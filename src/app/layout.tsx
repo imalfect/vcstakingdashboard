@@ -1,10 +1,11 @@
 import { config } from '@/config';
-import Web3ModalProvider from '@/context';
+import { ThemeProvider } from '@/providers/ThemeProvider';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { headers } from 'next/headers';
 import React from 'react';
 import { cookieToInitialState } from 'wagmi';
+import Web3ModalProvider from '../providers/WebThreeModalProvider';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -23,7 +24,9 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body className={inter.className}>
-				<Web3ModalProvider initialState={initialState}>{children}</Web3ModalProvider>
+				<ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+					<Web3ModalProvider initialState={initialState}>{children}</Web3ModalProvider>
+				</ThemeProvider>
 			</body>
 		</html>
 	);
