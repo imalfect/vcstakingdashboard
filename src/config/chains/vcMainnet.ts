@@ -1,3 +1,4 @@
+import { VinuChain } from '@/types/vinuChain';
 import { Chain } from 'viem';
 
 export default {
@@ -35,4 +36,4 @@ export default {
 			address: '0xb914a0b16111BaB228ae6214e6E1FD4a5EaE877C'
 		}
 	}
-} as const satisfies Chain;
+} as const satisfies Chain & VinuChain;
