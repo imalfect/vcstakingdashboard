@@ -2,6 +2,7 @@ import { Address } from 'viem';
 
 // All stake values are in wei
 export default interface Validator {
+	id: bigint; // Validator ID
 	status: bigint; // 0 = active, 1 = offline, 8 = slashed
 	deactivated: boolean; // Whether the validator is deactivated
 	deactivatedTime?: bigint; // Time when the validator was deactivated
@@ -14,6 +15,7 @@ export default interface Validator {
 	selfStake: bigint; // Self-stake
 	delegatedStake: bigint; // Delegated stake,
 	lockedSelfStake: bigint; // Locked self-stake
+	remainingLockedStakeDays: number; // Remaining days for the self-stake to be able to be unlocked
 	socialInfoUrl?: string; // URL to the social info
 }
 /*

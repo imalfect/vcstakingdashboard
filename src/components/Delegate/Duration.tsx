@@ -1,8 +1,16 @@
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/ui/date-picker';
+import { unixify } from '@/scripts/unixify';
+import Validator from '@/types/validator';
+import dayjs from 'dayjs';
+import { useState } from 'react';
 
-export default function DelegateDuration(props: { onDuration: () => void }) {
+export default function DelegateDuration(props: {
+	onDuration: (duration: number) => void;
+	validator: Validator;
+}) {
+	const [duration, setDuration] = useState(0);
 	return (
 		<div className={'flex flex-col items-center justify-center gap-6'}>
 			<PageHeader
@@ -12,16 +20,36 @@ export default function DelegateDuration(props: { onDuration: () => void }) {
 				}
 			/>
 			<div className={'flex flex-col items-center gap-1'}>
-				<div className="flex w-full max-w-sm items-center space-x-2">
-					<Input type="number" placeholder="10 VC" />
-					<Button>Available Balance</Button>
-				</div>
-				<span className={'text-gray-700 dark:text-gray-300'}>100,000 VC Available</span>
+				<DatePicker
+					onDate={(date) => {
+						setDuration(unixify(date));
+					}}
+					toDate={dayjs()
+						.add(props.validator.remainingLockedStakeDays - 1, 'days')
+						.toDate()}
+				/>
 			</div>
 
-			<Button onClick={props.onDuration} className={'px-12'}>
-				Continue
-			</Button>
+			<div className={'flex justify-center gap-6'}>
+				<Button
+					disabled={duration === 0}
+					onClick={() => {
+						props.onDuration(duration);
+					}}
+					className={'px-12'}
+				>
+					Continue
+				</Button>
+				<Button
+					variant={'secondary'}
+					onClick={() => {
+						props.onDuration(0);
+					}}
+					className={'px-12'}
+				>
+					Don&apos;t lock
+				</Button>
+			</div>
 		</div>
 	);
 }

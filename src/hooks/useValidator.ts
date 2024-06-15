@@ -38,15 +38,16 @@ export default function useValidator(validatorId: bigint): Validator | null {
 	const validatorInfo = validatorData.data && validatorData.data[0].result;
 	const selfStake = validatorData.data && validatorData.data[1].result;
 	const socialInfo = validatorData.data && validatorData.data[2].result;
-	const lockedSelfStake = useReadContract({
+	const lockupInfo = useReadContract({
 		...sfcContract,
 		functionName: 'getLockupInfo',
 		args: [(validatorInfo && validatorInfo[6]) || '0x0', validatorId]
 	}).data;
-	if (!validatorInfo || !selfStake || !lockedSelfStake) {
+	if (!validatorInfo || !selfStake || !lockupInfo) {
 		return null;
 	}
 	return {
+		id: validatorId,
 		status: validatorInfo[0],
 		deactivated: validatorInfo[1] !== 0n,
 		deactivatedTime: validatorInfo[1] !== 0n ? validatorInfo[2] : undefined,
@@ -57,7 +58,10 @@ export default function useValidator(validatorId: bigint): Validator | null {
 		auth: validatorInfo[6],
 		selfStake: selfStake,
 		delegatedStake: validatorInfo[3] - selfStake,
-		lockedSelfStake: lockedSelfStake[0],
+		lockedSelfStake: lockupInfo[0],
+		remainingLockedStakeDays: Math.floor(
+			Number(lockupInfo[2]) * 1000 - new Date().getTime() / (1000 * 60 * 60 * 24)
+		),
 		socialInfoUrl: socialInfo
 	};
 }
