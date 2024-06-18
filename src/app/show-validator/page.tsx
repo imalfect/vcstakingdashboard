@@ -208,3 +208,38 @@ export default function ValidatorCard() {
 		</main>
 	);
 }
+
+/*
+	<TransactionProcessor
+					active={true}
+					onSuccess={() => {
+						alert('Success!');
+					}}
+					onFail={(transactions) => {
+						alert('Failed!');
+					}}
+					transactions={[
+						{
+							abi: sfc,
+							address: '0x6b175474e89094c44da98b954eedeac495271d0f',
+							functionName: 'claimRewards',
+							args: [12n],
+							name: 'Claim rewards'
+						},
+						{
+							abi: sfc,
+							address: '0x6b175474e89094c44da98b954eedeac495271d0f',
+							functionName: 'claimRewards',
+							args: [12n],
+							name: 'Claim rewards'
+						},
+						{
+							abi: sfc,
+							address: '0x6b175474e89094c44da98b954eedeac495271d0f',
+							functionName: 'claimRewards',
+							args: [12n],
+							name: 'Claim rewards'
+						}
+					]}
+				/>
+ */

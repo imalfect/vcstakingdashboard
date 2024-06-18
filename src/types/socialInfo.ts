@@ -1,6 +1,6 @@
 export default interface ValidatorSocialInfo {
 	name: string;
-	logo: string;
+	logoUrl: string;
 	website: string;
 	contact: string;
 	error: 'cors' | 'not-found';

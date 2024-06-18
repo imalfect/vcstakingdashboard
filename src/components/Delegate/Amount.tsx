@@ -22,7 +22,7 @@ export default function DelegateAmount(props: { onAmount: (amount: bigint) => vo
 					<Input
 						type="number"
 						placeholder="10 VC"
-						value={(amount / BigInt(10 ** 18)).toString()}
+						value={amount.toString()}
 						onChange={(e) => {
 							setAmount(BigInt(e.target.value));
 						}}

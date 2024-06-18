@@ -1,8 +1,12 @@
+import {
+	useTransactionProcessor,
+	useTransactionProcessorDispatch
+} from '@/components/TransactionProcessor/context';
 import TransactionProcessorTransaction from '@/components/TransactionProcessor/Transaction';
+import { TrackedTransaction } from '@/components/TransactionProcessor/types';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
-	DialogClose,
 	DialogContent,
 	DialogDescription,
 	DialogFooter,
@@ -11,7 +15,6 @@ import {
 } from '@/components/ui/dialog';
 import {
 	Drawer,
-	DrawerClose,
 	DrawerContent,
 	DrawerDescription,
 	DrawerFooter,
@@ -19,18 +22,18 @@ import {
 	DrawerTitle
 } from '@/components/ui/drawer';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { TransactionStatus } from '@/types/transaction';
 
 export function TransactionProcessorModal(props: {
 	open: boolean;
-	onOpenChange: (open: boolean) => void;
-	transactions: TransactionStatus[];
+	onSuccess: () => void;
+	onFail: (transactions: TrackedTransaction[]) => void;
 }) {
 	const isDesktop = useMediaQuery('(min-width: 768px)');
-
+	const transactions = useTransactionProcessor();
+	const dispatch = useTransactionProcessorDispatch();
 	if (isDesktop) {
 		return (
-			<Dialog open={props.open} onOpenChange={props.onOpenChange}>
+			<Dialog open={props.open}>
 				<DialogContent className="sm:max-w-[425px]">
 					<DialogHeader>
 						<DialogTitle>Finalize Transaction</DialogTitle>
@@ -38,20 +41,43 @@ export function TransactionProcessorModal(props: {
 							Please review the transaction details before finalizing.
 						</DialogDescription>
 					</DialogHeader>
-					{props.transactions.map((transaction, index) => (
-						<TransactionProcessorTransaction
-							key={index}
-							name={transaction.name}
-							status={transaction.status}
-							message={transaction.message}
-						/>
+					{transactions.map((transaction) => (
+						<TransactionProcessorTransaction id={transaction.id} key={transaction.id} />
 					))}
 					<DialogFooter className="pt-2">
-						<DialogClose asChild>
-							<Button variant="outline">Cancel</Button>
-						</DialogClose>
-						<Button variant="secondary">Retry</Button>
-						<Button>Continue</Button>
+						<Button
+							variant="outline"
+							disabled={
+								transactions.some((transaction) => transaction.status === 'pending') ||
+								transactions.every((transaction) => transaction.status === 'success')
+							}
+							onClick={() => {
+								props.onFail(transactions);
+							}}
+						>
+							Cancel
+						</Button>
+						{transactions.some((transaction) => transaction.status === 'error') &&
+							transactions.some((transaction) => transaction.status !== 'pending') && (
+								<Button
+									variant="secondary"
+									onClick={() => {
+										dispatch({
+											type: 'retry_failed_transactions'
+										});
+									}}
+								>
+									Retry
+								</Button>
+							)}
+						<Button
+							disabled={!transactions.every((transaction) => transaction.status === 'success')}
+							onClick={() => {
+								props.onSuccess();
+							}}
+						>
+							Continue
+						</Button>
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
@@ -59,30 +85,48 @@ export function TransactionProcessorModal(props: {
 	}
 
 	return (
-		<Drawer open={props.open} onOpenChange={props.onOpenChange}>
+		<Drawer open={props.open}>
 			<DrawerContent>
 				<DrawerHeader>
 					<DrawerTitle>Finalize Transaction</DrawerTitle>
 					<DrawerDescription>Please review the transaction details before finalizing.</DrawerDescription>
 				</DrawerHeader>
 				<div className={'mx-auto flex flex-col items-start gap-3'}>
-					{props.transactions.map((transaction, index) => (
-						<TransactionProcessorTransaction
-							key={index}
-							name={transaction.name}
-							status={transaction.status}
-							message={transaction.message}
-						/>
+					{transactions.map((transaction: TrackedTransaction) => (
+						<TransactionProcessorTransaction id={transaction.id} key={transaction.id} />
 					))}
 				</div>
 				<DrawerFooter className="pt-2">
-					<DrawerClose asChild>
-						<Button variant="outline">Cancel</Button>
-					</DrawerClose>
-					<div className={'flex flex-grow gap-3'}>
-						<Button variant="secondary">Retry</Button>
-						<Button>Continue</Button>
-					</div>
+					<Button
+						variant="outline"
+						disabled={transactions.some((transaction) => transaction.status === 'pending')}
+						onClick={() => {
+							props.onFail(transactions);
+						}}
+					>
+						Cancel
+					</Button>
+					{transactions.some((transaction) => transaction.status === 'error') &&
+						transactions.some((transaction) => transaction.status !== 'pending') && (
+							<Button
+								variant="secondary"
+								onClick={() => {
+									dispatch({
+										type: 'retry_failed_transactions'
+									});
+								}}
+							>
+								Retry
+							</Button>
+						)}
+					<Button
+						disabled={!transactions.every((transaction) => transaction.status === 'success')}
+						onClick={() => {
+							props.onSuccess();
+						}}
+					>
+						Continue
+					</Button>
 				</DrawerFooter>
 			</DrawerContent>
 		</Drawer>

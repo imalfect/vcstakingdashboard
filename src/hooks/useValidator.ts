@@ -2,6 +2,7 @@ import SFCAbi from '@/config/contracts/sfc';
 import StakeAbi from '@/config/contracts/stake';
 import Validator from '@/types/validator';
 import { VinuChain } from '@/types/vinuChain';
+import dayjs from 'dayjs';
 import { Chain } from 'viem';
 import { useClient, useReadContract, useReadContracts } from 'wagmi';
 
@@ -59,9 +60,7 @@ export default function useValidator(validatorId: bigint): Validator | null {
 		selfStake: selfStake,
 		delegatedStake: validatorInfo[3] - selfStake,
 		lockedSelfStake: lockupInfo[0],
-		remainingLockedStakeDays: Math.floor(
-			Number(lockupInfo[2]) * 1000 - new Date().getTime() / (1000 * 60 * 60 * 24)
-		),
+		remainingLockedStakeDays: Math.floor(dayjs.unix(Number(lockupInfo[2])).diff(dayjs(), 'days')),
 		socialInfoUrl: socialInfo
 	};
 }

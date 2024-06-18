@@ -24,6 +24,7 @@ export default function DelegateDuration(props: {
 					onDate={(date) => {
 						setDuration(unixify(date));
 					}}
+					fromDate={dayjs().add(14, 'days').toDate()}
 					toDate={dayjs()
 						.add(props.validator.remainingLockedStakeDays - 1, 'days')
 						.toDate()}
