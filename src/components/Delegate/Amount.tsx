@@ -2,15 +2,15 @@ import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import humanify from '@/scripts/humanify';
+import BigNumber from 'bignumber.js';
 import { useState } from 'react';
 import { useAccount, useBalance } from 'wagmi';
-
 export default function DelegateAmount(props: { onAmount: (amount: bigint) => void }) {
 	const account = useAccount();
 	const balance = useBalance({
 		address: account.address
 	});
-	const [amount, setAmount] = useState<bigint>(0n);
+	const [amount, setAmount] = useState('');
 	return (
 		<div className={'flex flex-col items-center justify-center gap-6'}>
 			<PageHeader
@@ -22,15 +22,15 @@ export default function DelegateAmount(props: { onAmount: (amount: bigint) => vo
 					<Input
 						type="number"
 						placeholder="10 VC"
-						value={amount.toString()}
+						value={amount}
 						onChange={(e) => {
-							setAmount(BigInt(e.target.value));
+							setAmount(e.target.value);
 						}}
 					/>
 					{balance.data && (
 						<Button
 							onClick={() => {
-								setAmount(balance.data.value);
+								setAmount(new BigNumber(balance.data.value.toString()).shiftedBy(-18).toFixed(2));
 							}}
 						>
 							Available Balance
@@ -45,9 +45,15 @@ export default function DelegateAmount(props: { onAmount: (amount: bigint) => vo
 			</div>
 			<Button
 				onClick={() => {
-					props.onAmount(amount);
+					props.onAmount(BigInt(new BigNumber(amount).shiftedBy(18).toFixed(0)));
 				}}
-				disabled={amount === 0n || (balance.data && balance.data.value < amount) || amount < 0n}
+				disabled={
+					amount === '' ||
+					amount === '0' ||
+					(balance.data &&
+						balance.data.value < BigInt(new BigNumber(amount).shiftedBy(18).toFixed(0))) ||
+					parseFloat(amount) <= 0
+				}
 				className={'px-12'}
 			>
 				Continue
