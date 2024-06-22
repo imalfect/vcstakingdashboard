@@ -7,7 +7,9 @@ import { Button } from '@/components/ui/button';
 import vcMainnet from '@/config/chains/vcMainnet';
 import delegateToValidator from '@/generators/delegateToValidator';
 import lockupValidatorDelegation from '@/generators/lockupValidatorDelegation';
+import relockValidatorDelegation from '@/generators/relockValidatorDelegation';
 import humanify from '@/scripts/humanify';
+import { LockedDelegation } from '@/types/lockedDelegation';
 import Validator from '@/types/validator';
 import dayjs from 'dayjs';
 import { useState } from 'react';
@@ -20,26 +22,45 @@ export default function DelegateFinalize(props: {
 	amount: bigint;
 	duration: number;
 	validator: Validator;
+	previousDelegation?: LockedDelegation;
 }) {
 	const [active, setActive] = useState(false);
 	const account = useAccount();
-	console.log(dayjs.unix(props.duration).diff(dayjs(), 'seconds'));
-	// @ts-ignore
-	// @ts-ignore
 	return (
 		<div className={'flex flex-col items-center justify-center gap-6'}>
 			<PageHeader
 				title={'Finalize'}
 				subtitle={"Review your delegation and confirm it. You won't be able to change it later."}
 			/>
-			<p className={'text-xl'}>
+			<p className={'px-6 text-xl'}>
 				You are delegating <span className={'font-bold'}>{humanify(props.amount)} VC</span> to{' '}
-				<span className={'font-bold'}>Validator {props.validator.id.toString()}.</span> This delegation{' '}
-				<span className={'font-bold'}>
+				<b>Validator {props.validator.id.toString()}.</b> This delegation{' '}
+				<span>
 					will{' '}
-					{props.duration === 0
-						? 'not be locked'
-						: `be locked for ${dayjs.unix(props.duration).diff(dayjs(), 'days')} ${dayjs.unix(props.duration).diff(dayjs(), 'days') === 1 ? 'day' : 'days'}`}
+					{props.duration === 0 ? (
+						<b>not be locked</b>
+					) : (
+						<>
+							{props.previousDelegation === undefined ? (
+								<b>be locked</b>
+							) : (
+								<>
+									{' '}
+									<b>be relocked</b> with{' '}
+									<b>your previous {humanify(props.previousDelegation.lockedStake)} VC delegation</b>
+								</>
+							)}
+							<span>
+								{' '}
+								for{' '}
+								<b>
+									{dayjs.unix(props.duration).diff(dayjs(), 'days')}{' '}
+									{dayjs.unix(props.duration).diff(dayjs(), 'days') === 1 ? 'day' : 'days'}
+								</b>
+								.
+							</span>
+						</>
+					)}
 				</span>
 			</p>
 			<div className={'flex justify-center gap-6'}>
@@ -71,7 +92,17 @@ export default function DelegateFinalize(props: {
 						props.amount
 					),
 					props.duration !== 0 &&
+						!props.previousDelegation &&
 						lockupValidatorDelegation(
+							sfc,
+							(account.chain as typeof vcMainnet).contracts.sfc.address,
+							props.validator.id,
+							props.amount,
+							dayjs.unix(props.duration).diff(dayjs(), 'seconds')
+						),
+					props.duration !== 0 &&
+						props.previousDelegation !== undefined &&
+						relockValidatorDelegation(
 							sfc,
 							(account.chain as typeof vcMainnet).contracts.sfc.address,
 							props.validator.id,

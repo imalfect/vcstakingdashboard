@@ -5,6 +5,7 @@ import humanify from '@/scripts/humanify';
 import BigNumber from 'bignumber.js';
 import { useState } from 'react';
 import { useAccount, useBalance } from 'wagmi';
+BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_DOWN });
 export default function DelegateAmount(props: { onAmount: (amount: bigint) => void }) {
 	const account = useAccount();
 	const balance = useBalance({
@@ -30,7 +31,7 @@ export default function DelegateAmount(props: { onAmount: (amount: bigint) => vo
 					{balance.data && (
 						<Button
 							onClick={() => {
-								setAmount(new BigNumber(balance.data.value.toString()).shiftedBy(-18).toFixed(2));
+								setAmount(new BigNumber(balance.data.value.toString()).shiftedBy(-18).toFixed(1));
 							}}
 						>
 							Available Balance

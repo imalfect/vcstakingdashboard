@@ -7,6 +7,7 @@ import DelegateValidators from '@/components/Delegate/Validators';
 import DelegateWarning from '@/components/Delegate/Warning';
 import PageHeader from '@/components/PageHeader';
 import WalletNotConnected from '@/components/WalletNotConnected';
+import { LockedDelegation } from '@/types/lockedDelegation';
 import Validator from '@/types/validator';
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
@@ -23,6 +24,7 @@ export default function Delegate() {
 	const [validator, setValidator] = useState<Validator | null>();
 	const [amount, setAmount] = useState(0n);
 	const [duration, setDuration] = useState(0);
+	const [previousLockedDelegation, setPreviousLockedDelegation] = useState<LockedDelegation>();
 	const [success, setSuccess] = useState(false);
 	const account = useAccount();
 	return (
@@ -68,9 +70,16 @@ export default function Delegate() {
 						<DelegateDuration
 							/* Validator is already chosen here by a previous step */
 							validator={validator!}
-							onDuration={(duration: number) => {
+							onDuration={(
+								duration: number,
+								relock: boolean,
+								previousLockedDelegation?: LockedDelegation | null
+							) => {
 								setDuration(duration);
 								setScreen(Screen.Finalize);
+								if (relock && previousLockedDelegation) {
+									setPreviousLockedDelegation(previousLockedDelegation as LockedDelegation);
+								}
 							}}
 						/>
 					)}
@@ -79,6 +88,7 @@ export default function Delegate() {
 							amount={amount}
 							duration={duration}
 							validator={validator!}
+							previousDelegation={previousLockedDelegation}
 							onFail={() => {
 								setSuccess(false);
 								setScreen(Screen.Finish);
