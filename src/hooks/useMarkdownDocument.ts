@@ -1,13 +1,17 @@
-import { serialize } from 'next-mdx-remote/serialize';
+import { serialize, SerializeResult } from 'next-mdx-remote-client/serialize';
 import { useEffect, useState } from 'react';
 
 export default function useMarkdownDocument(id: string) {
-	const [body, setBody] = useState<string | null>(null);
+	const [body, setBody] = useState<SerializeResult | null>();
 	useEffect(() => {
 		fetch('/document/' + id + '.mdx')
 			.then((res) => res.text())
-			.then((mdxSource) => serialize(mdxSource))
-			.then((mdxSource) => mdxSource.compiledSource)
+			.then((mdxSource) =>
+				serialize({
+					source: mdxSource
+				})
+			)
+			.then((mdxSource) => mdxSource)
 			.then(setBody)
 			.catch(() => setBody(null));
 	}, [id]);
