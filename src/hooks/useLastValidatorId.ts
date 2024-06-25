@@ -3,13 +3,13 @@ import { VinuChain } from '@/types/vinuChain';
 import { Chain } from 'viem';
 import { useClient, useReadContract } from 'wagmi';
 
-export default function useCurrentEpoch() {
+export default function useLastValidatorId() {
 	const client = useClient();
 	const typedChain = client?.chain as (Chain & VinuChain) | undefined;
-	const currentEpoch = useReadContract({
+	const lastValidatorId = useReadContract({
 		abi: SFCAbi,
 		address: typedChain?.contracts.sfc.address,
-		functionName: 'currentEpoch'
+		functionName: 'lastValidatorID'
 	});
-	return (currentEpoch.data as bigint) || 0n;
+	return lastValidatorId.data as bigint | null;
 }

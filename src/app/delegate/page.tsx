@@ -5,8 +5,8 @@ import DelegateFinalize from '@/components/Delegate/Finalize';
 import DelegateFinish from '@/components/Delegate/Finish';
 import DelegateValidators from '@/components/Delegate/Validators';
 import DelegateWarning from '@/components/Delegate/Warning';
-import PageHeader from '@/components/PageHeader';
-import WalletNotConnected from '@/components/WalletNotConnected';
+import PageHeader from '@/components/Misc/PageHeader';
+import WalletNotConnected from '@/components/Misc/WalletNotConnected';
 import { LockedDelegation } from '@/types/lockedDelegation';
 import Validator from '@/types/validator';
 import { useState } from 'react';
@@ -28,7 +28,7 @@ export default function Delegate() {
 	const [success, setSuccess] = useState(false);
 	const account = useAccount();
 	return (
-		<main className={'flex min-h-screen flex-col items-center justify-center'}>
+		<main className={'flex min-h-screen flex-col items-center justify-center px-6'}>
 			<PageHeader
 				hidden
 				title={'Delegate'}

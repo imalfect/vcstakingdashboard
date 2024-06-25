@@ -1,5 +1,5 @@
 'use client';
-import PageHeader from '@/components/PageHeader';
+import PageHeader from '@/components/Misc/PageHeader';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -27,10 +27,12 @@ export default function DelegateFinish(props: { success: boolean }) {
 				}
 			/>
 			<div className={'flex flex-col gap-3'}>
-				<p>there will be a delegation card here (which will be made for the dashboard)</p>
 				<div className={'flex justify-center gap-6'}>
 					<Button onClick={() => router.push('/')} className={'px-12'}>
 						Home
+					</Button>
+					<Button onClick={() => router.push('/delegations')} className={'px-12'}>
+						Delegation Dashboard
 					</Button>
 					<Button onClick={() => router.push('/dashboard')} className={'px-12'}>
 						Delegate Again

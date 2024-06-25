@@ -1,4 +1,5 @@
-import Navigation from '@/components/Navigation';
+import Navigation from '@/components/Core/Navigation';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { config } from '@/config';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import { clsx } from 'clsx';
@@ -13,9 +14,9 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-	title: 'VinuChain Staking Dasboard',
+	title: 'VinuChain Staking Station',
 	description:
-		'VinuChain Staking Dashboard allows you to delegate your tokens to validators and earn rewards with ease.'
+		'VinuChain Staking Station allows you to delegate your tokens to validators and earn rewards with ease.'
 };
 export default function RootLayout({
 	children
@@ -28,10 +29,12 @@ export default function RootLayout({
 			<body className={clsx(inter.className)}>
 				<ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
 					<Web3ModalProvider initialState={initialState}>
-						<div className={'absolute bottom-0 left-0 right-0 flex w-full justify-center pb-4'}>
-							<Navigation />
-						</div>
-						{children}
+						<TooltipProvider>
+							<div className={'absolute bottom-0 left-0 right-0 flex w-full justify-center pb-4'}>
+								<Navigation />
+							</div>
+							{children}
+						</TooltipProvider>
 					</Web3ModalProvider>
 				</ThemeProvider>
 			</body>

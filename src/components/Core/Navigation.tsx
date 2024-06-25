@@ -1,7 +1,14 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { useWeb3Modal } from '@web3modal/wagmi/react';
-import { LucideCoins, LucideHome, LucideReceiptText, LucideWallet } from 'lucide-react';
+import {
+	LucideCoins,
+	LucideHome,
+	LucideInfo,
+	LucideMailbox,
+	LucideReceiptText,
+	LucideWallet
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 export default function Navigation() {
 	const router = useRouter();
@@ -31,6 +38,23 @@ export default function Navigation() {
 				}}
 			>
 				<LucideReceiptText />
+			</Button>
+			<Button
+				size={'icon'}
+				onClick={() => {
+					router.push('/withdraw-requests');
+				}}
+			>
+				<LucideMailbox />
+			</Button>
+
+			<Button
+				size={'icon'}
+				onClick={() => {
+					router.push('/about');
+				}}
+			>
+				<LucideInfo />
 			</Button>
 			<Button
 				size={'icon'}

@@ -1,6 +1,7 @@
 import vcMainnet from '@/config/chains/vcMainnet';
 import vcTestnet from '@/config/chains/vcTestnet';
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
+import { http } from 'viem';
 import { cookieStorage, createStorage } from 'wagmi';
 
 // Get projectId at https://cloud.walletconnect.com
@@ -23,6 +24,14 @@ export const config = defaultWagmiConfig({
 	projectId,
 	metadata,
 	ssr: true,
+	transports: {
+		[chains[0].id]: http(chains[0].rpcUrls.default.http[0], {
+			batch: true
+		}),
+		[chains[1].id]: http(chains[1].rpcUrls.default.http[0], {
+			batch: true
+		})
+	},
 	storage: createStorage({
 		storage: cookieStorage
 	})

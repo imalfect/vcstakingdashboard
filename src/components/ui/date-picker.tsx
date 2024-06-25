@@ -10,7 +10,13 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { useEffect } from 'react';
 
-export function DatePicker(props: { onDate: (date: Date) => void; toDate: Date; fromDate: Date }) {
+export function DatePicker(props: {
+	onDate: (date: Date) => void;
+	toDate: Date;
+	fromDate: Date;
+
+	placeholder?: string;
+}) {
 	const [date, setDate] = React.useState<Date>();
 	useEffect(() => {
 		if (date) {
@@ -28,7 +34,7 @@ export function DatePicker(props: { onDate: (date: Date) => void; toDate: Date; 
 					)}
 				>
 					<CalendarIcon className="mr-2 h-4 w-4" />
-					{date ? format(date, 'PPP') : <span>Pick a date</span>}
+					{date ? format(date, 'PPP') : <span>{props.placeholder || 'Pick a date'}</span>}
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-auto p-0">

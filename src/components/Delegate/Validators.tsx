@@ -1,6 +1,6 @@
 'use client';
-import PageHeader from '@/components/PageHeader';
-import ValidatorCard from '@/components/ValidatorCard';
+import ValidatorCard from '@/components/Cards/ValidatorCard';
+import PageHeader from '@/components/Misc/PageHeader';
 import {
 	Carousel,
 	CarouselContent,

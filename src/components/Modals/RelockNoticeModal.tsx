@@ -1,4 +1,4 @@
-import DocumentModal from '@/components/DocumentModal/DocumentModal';
+import DocumentModal from '@/components/Modals/DocumentModal';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,

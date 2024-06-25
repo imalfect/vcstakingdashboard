@@ -8,7 +8,7 @@ export interface ReducerPayload {
 
 export interface TransactionAction {
 	type: string;
-	payload: ReducerPayload;
+	payload: ReducerPayload | TransactionProp[];
 }
 
 export type TransactionProp = WriteContractParameters & { name: string };

@@ -1,13 +1,13 @@
 'use client';
-import PageHeader from '@/components/PageHeader';
+import PageHeader from '@/components/Misc/PageHeader';
 import sfc from '@/config/contracts/sfc';
 
 import TransactionProcessor from '@/components/TransactionProcessor/Processor';
 import { Button } from '@/components/ui/button';
 import vcMainnet from '@/config/chains/vcMainnet';
-import delegateToValidator from '@/generators/delegateToValidator';
-import lockupValidatorDelegation from '@/generators/lockupValidatorDelegation';
-import relockValidatorDelegation from '@/generators/relockValidatorDelegation';
+import delegateToValidator from '@/generators/write/delegateToValidator';
+import lockupValidatorDelegation from '@/generators/write/lockupValidatorDelegation';
+import relockValidatorDelegation from '@/generators/write/relockValidatorDelegation';
 import humanify from '@/scripts/humanify';
 import { LockedDelegation } from '@/types/lockedDelegation';
 import Validator from '@/types/validator';

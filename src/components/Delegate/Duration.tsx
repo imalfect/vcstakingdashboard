@@ -1,5 +1,5 @@
-import PageHeader from '@/components/PageHeader';
-import RelockNoticeModal from '@/components/RelockNoticeModal';
+import PageHeader from '@/components/Misc/PageHeader';
+import RelockNoticeModal from '@/components/Modals/RelockNoticeModal';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
 import useLockedDelegation from '@/hooks/useLockedDelegation';
