@@ -29,32 +29,35 @@ export default function DelegationsPage() {
 			setAddress(account.address);
 		}, 1000);
 	};
-	return account.isConnected ? (
-		<UpdateContext.Provider value={update}>
-			<div className={'flex min-h-screen flex-col items-center justify-center'}>
-				<PageHeader title={'Delegations'} subtitle={'View your delegations'} />
-				<p className={'text-center'}>
-					Delegation disappeared after starting the undelegation process?{' '}
-					<Link href={'/withdraw-requests'} className={'underline'}>
-						Find it here
-					</Link>
-				</p>
-				{delegs.length > 0 && (
-					<Carousel className={'mt-6 w-[22rem] lg:w-[45rem] xl:w-[68rem]'}>
-						<CarouselContent>
-							{delegs.map((delegation) => (
-								<CarouselItem key={delegation.validatorId} className={'lg:basis-1/2 xl:basis-1/3'}>
-									<DelegationCard delegation={delegation} />
-								</CarouselItem>
-							))}
-						</CarouselContent>
-						<CarouselPrevious className={'hidden lg:flex'} />
-						<CarouselNext className={'hidden lg:flex'} />
-					</Carousel>
-				)}
-			</div>
-		</UpdateContext.Provider>
-	) : (
-		<WalletNotConnected />
+	return (
+		<div className={'flex min-h-screen flex-col items-center justify-center'}>
+			{account.isConnected ? (
+				<UpdateContext.Provider value={update}>
+					<PageHeader title={'Delegations'} subtitle={'View your delegations'} />
+					<p className={'text-center'}>
+						Delegation disappeared after starting the undelegation process?{' '}
+						<Link href={'/withdraw-requests'} className={'underline'}>
+							Find it here
+						</Link>
+					</p>
+					{delegs.length > 0 && (
+						<Carousel className={'mt-6 w-[22rem] lg:w-[45rem] xl:w-[68rem]'}>
+							<CarouselContent>
+								{delegs.map((delegation) => (
+									<CarouselItem key={delegation.validatorId} className={'lg:basis-1/2 xl:basis-1/3'}>
+										<DelegationCard delegation={delegation} />
+									</CarouselItem>
+								))}
+							</CarouselContent>
+							<CarouselPrevious className={'hidden lg:flex'} />
+							<CarouselNext className={'hidden lg:flex'} />
+						</Carousel>
+					)}
+				</UpdateContext.Provider>
+			) : (
+				<WalletNotConnected />
+			)}
+			;
+		</div>
 	);
 }

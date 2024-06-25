@@ -3,9 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { LucideTriangleAlert } from 'lucide-react';
 import { useState } from 'react';
+import { useLocalStorage } from 'usehooks-ts';
 
 export default function DelegateWarning(props: { onAccepted: () => void }) {
 	const [checked, setChecked] = useState([false, false, false]);
+	const [didAcknowledgeWarning, setdidAcknowledgeWarning] = useLocalStorage(
+		'delegate-warning-acknowledged',
+		false
+	);
 	return (
 		<div className={'flex flex-col items-center justify-center gap-6'}>
 			<h2 className={'flex items-center gap-3 text-2xl font-bold md:text-4xl'}>
@@ -64,7 +69,10 @@ export default function DelegateWarning(props: { onAccepted: () => void }) {
 			<Button
 				size={'lg'}
 				disabled={!(checked[0] && checked[1] && checked[2])}
-				onClick={props.onAccepted}
+				onClick={() => {
+					setdidAcknowledgeWarning(true);
+					props.onAccepted();
+				}}
 			>
 				I understand, let&apos;s get started
 			</Button>

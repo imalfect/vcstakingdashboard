@@ -1,5 +1,5 @@
 'use client';
-import { Button } from '@/components/ui/button';
+import { TooltipButton } from '@/components/ui/tooltip-button';
 import { useWeb3Modal } from '@web3modal/wagmi/react';
 import {
 	LucideCoins,
@@ -15,55 +15,34 @@ export default function Navigation() {
 	const { open } = useWeb3Modal();
 	return (
 		<div className={'flex items-end justify-center gap-3'}>
-			<Button
-				size={'icon'}
-				onClick={() => {
-					router.push('/');
-				}}
-			>
+			<TooltipButton message={'Home'} size={'icon'} onClick={() => router.push('/')}>
 				<LucideHome />
-			</Button>
-			<Button
-				size={'icon'}
-				onClick={() => {
-					router.push('/delegate');
-				}}
-			>
+			</TooltipButton>
+			<TooltipButton message={'Delegate'} size={'icon'} onClick={() => router.push('/delegate')}>
 				<LucideCoins />
-			</Button>
-			<Button
-				size={'icon'}
-				onClick={() => {
-					router.push('/delegations');
-				}}
-			>
+			</TooltipButton>
+			<TooltipButton message={'Delegations'} size={'icon'} onClick={() => router.push('/delegations')}>
 				<LucideReceiptText />
-			</Button>
-			<Button
+			</TooltipButton>
+			<TooltipButton
+				message={'Withdraw Requests'}
 				size={'icon'}
-				onClick={() => {
-					router.push('/withdraw-requests');
-				}}
+				onClick={() => router.push('/withdraw-requests')}
 			>
 				<LucideMailbox />
-			</Button>
-
-			<Button
-				size={'icon'}
-				onClick={() => {
-					router.push('/about');
-				}}
-			>
+			</TooltipButton>
+			<TooltipButton message={'About'} size={'icon'} onClick={() => router.push('/about')}>
 				<LucideInfo />
-			</Button>
-			<Button
+			</TooltipButton>
+			<TooltipButton
+				message={'Wallet'}
 				size={'icon'}
 				onClick={() => {
 					open();
 				}}
 			>
 				<LucideWallet />
-			</Button>
+			</TooltipButton>
 		</div>
 	);
 }

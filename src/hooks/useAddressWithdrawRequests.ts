@@ -16,13 +16,16 @@ export default function useAddressWithdrawRequests(address: Address): WithdrawRe
 			getWrRequests(sfc, typedChain?.contracts.sfc.address || '0x0', BigInt(validatorId), address)
 		)
 	}).data as {
+		status: 'success' | 'failure';
 		result: {
 			epoch: bigint;
 			time: bigint;
 			amount: bigint;
 		}[];
 	}[];
+	console.log(withdrawRequests);
 	if (!withdrawRequests) return [];
+	if (withdrawRequests[0].status === 'failure') return [];
 	return validatorIds
 		.map((validatorId, index) => {
 			return withdrawRequests[index].result.map((singleWithdrawRequest, wrIndex) => {

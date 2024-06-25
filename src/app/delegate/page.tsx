@@ -10,6 +10,7 @@ import WalletNotConnected from '@/components/Misc/WalletNotConnected';
 import { LockedDelegation } from '@/types/lockedDelegation';
 import Validator from '@/types/validator';
 import { useState } from 'react';
+import { useLocalStorage } from 'usehooks-ts';
 import { useAccount } from 'wagmi';
 enum Screen {
 	Warning,
@@ -20,12 +21,18 @@ enum Screen {
 	Finish
 }
 export default function Delegate() {
-	const [screen, setScreen] = useState<Screen>(Screen.Warning);
 	const [validator, setValidator] = useState<Validator | null>();
 	const [amount, setAmount] = useState(0n);
 	const [duration, setDuration] = useState(0);
 	const [previousLockedDelegation, setPreviousLockedDelegation] = useState<LockedDelegation>();
 	const [success, setSuccess] = useState(false);
+	const [didAcknowledgeWarning, setdidAcknowledgeWarning] = useLocalStorage(
+		'delegate-warning-acknowledged',
+		false
+	);
+	const [screen, setScreen] = useState<Screen>(
+		didAcknowledgeWarning ? Screen.Validators : Screen.Warning
+	);
 	const account = useAccount();
 	return (
 		<main className={'flex min-h-screen flex-col items-center justify-center px-6'}>
