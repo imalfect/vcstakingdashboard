@@ -61,8 +61,7 @@ export default function DelegateWarning(props: { onAccepted: () => void }) {
 						htmlFor="rule3"
 						className="text-base peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 					>
-						This software is in beta. Use at your own risk, it is very likely all of your funds will be
-						transferred to Kaffin by accident.
+						This software is in beta. Use at your own risk.
 					</label>
 				</div>
 			</div>
