@@ -14,7 +14,7 @@ export default {
 			http: ['https://vinuchain-rpc.com']
 		},
 		default: {
-			http: ['https://vinuchain-rpc.com']
+			http: ['http://188.165.195.122']
 		}
 	},
 	blockExplorers: {
