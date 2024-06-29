@@ -27,7 +27,7 @@ export default function DelegateFinish(props: { success: boolean }) {
 				}
 			/>
 			<div className={'flex flex-col gap-3'}>
-				<div className={'flex justify-center gap-6'}>
+				<div className={'flex flex-wrap justify-center gap-6'}>
 					<Button onClick={() => router.push('/')} className={'px-12'}>
 						Home
 					</Button>
