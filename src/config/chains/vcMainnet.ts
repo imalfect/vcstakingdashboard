@@ -11,10 +11,10 @@ export default {
 	},
 	rpcUrls: {
 		public: {
-			http: ['https://vinuchain-rpc.com']
+			http: ['https://rpc.vinuchain.org']
 		},
 		default: {
-			http: ['https://vinuchain-rpc.com']
+			http: ['https://rpc.vinuchain.org']
 		}
 	},
 	blockExplorers: {
