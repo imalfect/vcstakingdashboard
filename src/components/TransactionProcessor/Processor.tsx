@@ -16,7 +16,6 @@ export default function TransactionProcessor(props: {
 	onFail: (transactions: TrackedTransaction[]) => void;
 	active: boolean;
 }) {
-	console.log(props.transactions);
 	const account = useAccount();
 	const [trackedTransactions, dispatchTransactionChange] = useReducer(
 		reducer,
