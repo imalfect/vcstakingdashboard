@@ -1,5 +1,5 @@
 import { UpdateContext } from '@/components/Contexts/UpdateContext';
-import RelockDelegationContentModal from '@/components/Modals/Contents/RelockDelegationContent';
+import RelockDelegationContent from '@/components/Modals/Contents/RelockDelegationContent';
 import TransactionProcessor from '@/components/TransactionProcessor/Processor';
 import { Button } from '@/components/ui/button';
 import {
@@ -58,7 +58,7 @@ export default function RelockDelegationModal(props: {
 								Lock your coins for a longer period to maximize your rewards.
 							</DialogDescription>
 						</DialogHeader>
-						<RelockDelegationContentModal
+						<RelockDelegationContent
 							delegation={props.delegation}
 							validator={props.validator}
 							onNewLockDate={setNewLockDate}
@@ -112,7 +112,7 @@ export default function RelockDelegationModal(props: {
 							Lock your coins for a longer period to maximize your rewards.
 						</DrawerDescription>
 					</DrawerHeader>
-					<RelockDelegationContentModal
+					<RelockDelegationContent
 						mobile
 						delegation={props.delegation}
 						validator={props.validator}

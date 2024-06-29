@@ -6,7 +6,7 @@ import { clsx } from 'clsx';
 import dayjs from 'dayjs';
 import { LucideLockKeyhole, LucideLockOpen } from 'lucide-react';
 
-export default function RelockDelegationContentModal(props: {
+export default function RelockDelegationContent(props: {
 	mobile?: boolean;
 	delegation: Delegation;
 	validator: Validator | null;
