@@ -26,7 +26,6 @@ export default function WithdrawRequestCard(props: {
 	const validatorData = useValidator(props.withdrawRequest.validatorId);
 	const validatorSocial = useValidatorSocial(validatorData?.socialInfoUrl || '');
 	const [processorActive, setProcessorActive] = useState(false);
-	console.log(dd(props.withdrawRequest.time, props.withdrawalPeriods.time, 'seconds'));
 	return (
 		<>
 			<Card className={'w-72'}>

@@ -40,7 +40,7 @@ export default function DelegationsPage() {
 							Find it here
 						</Link>
 					</p>
-					{delegs.length > 0 && (
+					{delegs.length > 0 ? (
 						<Carousel className={'mt-6 w-[22rem] lg:w-[45rem] xl:w-[68rem]'}>
 							<CarouselContent>
 								{delegs.map((delegation) => (
@@ -52,6 +52,8 @@ export default function DelegationsPage() {
 							<CarouselPrevious className={'hidden lg:flex'} />
 							<CarouselNext className={'hidden lg:flex'} />
 						</Carousel>
+					) : (
+						<p>No delegations found.</p>
 					)}
 				</UpdateContext.Provider>
 			) : (

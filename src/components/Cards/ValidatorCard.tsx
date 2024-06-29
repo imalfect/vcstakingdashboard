@@ -20,7 +20,6 @@ export default function ValidatorCard(props: {
 }) {
 	const validatorData = useValidator(props.id);
 	const validatorSocial = useValidatorSocial(validatorData?.socialInfoUrl || '');
-	console.log(validatorData);
 	return validatorData ? (
 		<Card>
 			<CardHeader>

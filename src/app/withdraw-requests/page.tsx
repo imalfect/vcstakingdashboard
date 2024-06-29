@@ -42,7 +42,7 @@ export default function WithdrawRequestsPage() {
 					/>
 					<div className={'flex items-start gap-6'}>
 						<UpdateContext.Provider value={update}>
-							{withdrawRequests.length > 0 && (
+							{withdrawRequests.length > 0 ? (
 								<Carousel className={'mt-6 w-[18rem] lg:w-[37rem] xl:w-[56rem]'}>
 									<CarouselContent>
 										{withdrawRequests.map((withdrawRequest) => (
@@ -61,6 +61,8 @@ export default function WithdrawRequestsPage() {
 									<CarouselPrevious />
 									<CarouselNext />
 								</Carousel>
+							) : (
+								<p>No withdraw requests found.</p>
 							)}
 						</UpdateContext.Provider>
 					</div>
