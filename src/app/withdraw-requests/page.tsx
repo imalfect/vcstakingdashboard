@@ -43,12 +43,12 @@ export default function WithdrawRequestsPage() {
 					<div className={'flex items-start gap-6'}>
 						<UpdateContext.Provider value={update}>
 							{withdrawRequests.length > 0 ? (
-								<Carousel className={'mt-6 w-[18rem] lg:w-[37rem] xl:w-[56rem]'}>
+								<Carousel className={'mt-6 max-w-[18rem] lg:max-w-[37rem] xl:max-w-[56rem]'}>
 									<CarouselContent>
 										{withdrawRequests.map((withdrawRequest) => (
 											<CarouselItem
 												key={`wr${withdrawRequest.id}v${withdrawRequest.validatorId}`}
-												className={'lg:basis-1/2 xl:basis-1/3'}
+												className={'basis-auto'}
 											>
 												<WithdrawRequestCard
 													withdrawRequest={withdrawRequest}

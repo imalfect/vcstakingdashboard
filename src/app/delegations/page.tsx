@@ -41,10 +41,10 @@ export default function DelegationsPage() {
 						</Link>
 					</p>
 					{delegs.length > 0 ? (
-						<Carousel className={'mt-6 w-[22rem] lg:w-[45rem] xl:w-[68rem]'}>
+						<Carousel className={'mt-6 max-w-[22rem] lg:max-w-[45rem] xl:max-w-[68rem]'}>
 							<CarouselContent>
 								{delegs.map((delegation) => (
-									<CarouselItem key={delegation.validatorId} className={'lg:basis-1/2 xl:basis-1/3'}>
+									<CarouselItem key={delegation.validatorId} className={'basis-auto'}>
 										<DelegationCard delegation={delegation} />
 									</CarouselItem>
 								))}
