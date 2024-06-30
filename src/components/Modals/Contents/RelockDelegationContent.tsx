@@ -1,5 +1,6 @@
 import { DatePicker } from '@/components/ui/date-picker';
 import humanify from '@/scripts/humanify';
+import { unixify } from '@/scripts/unixify';
 import { Delegation } from '@/types/delegation';
 import Validator from '@/types/validator';
 import { clsx } from 'clsx';
@@ -13,6 +14,15 @@ export default function RelockDelegationContent(props: {
 	onNewLockDate: (date: Date) => void;
 	newLockDate: Date | null;
 }) {
+	console.log(props.delegation);
+	console.log('old delegation lock date', props.delegation.lockedDelegation!.endTime.toString());
+	console.log('new lock date', unixify(props.newLockDate!));
+	console.log(
+		`old lock date bigger than new? ${props.delegation.lockedDelegation!.endTime > unixify(props.newLockDate!)}`
+	);
+	console.log(
+		`difference in hours between old and new lock date: ${dayjs(props.newLockDate).diff(dayjs.unix(Number(props.delegation.lockedDelegation!.endTime)), 'hours')}`
+	);
 	return (
 		<>
 			<div

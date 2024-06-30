@@ -24,7 +24,7 @@ export function DatePicker(props: {
 		}
 	}, [props, date]);
 	return (
-		<Popover>
+		<Popover modal={true}>
 			<PopoverTrigger asChild>
 				<Button
 					variant={'outline'}
@@ -40,9 +40,9 @@ export function DatePicker(props: {
 			<PopoverContent className="w-auto p-0">
 				<Calendar
 					mode="single"
+					initialFocus
 					selected={date}
 					onSelect={setDate}
-					initialFocus
 					fromDate={props.fromDate}
 					toDate={props.toDate}
 				/>
