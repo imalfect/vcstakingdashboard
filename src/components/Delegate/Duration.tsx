@@ -2,14 +2,17 @@ import PageHeader from '@/components/Misc/PageHeader';
 import RelockNoticeModal from '@/components/Modals/RelockNoticeModal';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import useApproximateDelegationRewards from '@/hooks/useApproximateDelegationRewards';
 import useLockedDelegation from '@/hooks/useLockedDelegation';
+import humanify from '@/scripts/humanify';
 import { unixify } from '@/scripts/unixify';
 import { LockedDelegation } from '@/types/lockedDelegation';
 import Validator from '@/types/validator';
 import dayjs from 'dayjs';
+import { LucideInfo } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
-
 export default function DelegateDuration(props: {
 	onDuration: (
 		duration: number,
@@ -17,6 +20,7 @@ export default function DelegateDuration(props: {
 		previousLockedDelegation?: LockedDelegation | null
 	) => void;
 	validator: Validator;
+	amount: bigint;
 }) {
 	const [duration, setDuration] = useState(0);
 	const account = useAccount();
@@ -24,6 +28,10 @@ export default function DelegateDuration(props: {
 	console.log(previousLockedDelegation);
 	const [relockNoticeOpen, setRelockNoticeOpen] = useState(previousLockedDelegation !== null);
 	const [relockNoticeOpened, setRelockNoticeOpened] = useState(false);
+	const approximateDelegationRewards = useApproximateDelegationRewards(
+		props.amount,
+		dayjs.unix(duration).diff(dayjs(), 'seconds')
+	);
 	useEffect(() => {
 		if (previousLockedDelegation !== null && !relockNoticeOpened) {
 			setRelockNoticeOpen(true);
@@ -61,6 +69,25 @@ export default function DelegateDuration(props: {
 						.add(props.validator.remainingLockedStakeDays - 1, 'days')
 						.toDate()}
 				/>
+				{duration !== 0 && (
+					<p className={'mt-1 flex items-center gap-1 text-center'}>
+						Approximately <b>{approximateDelegationRewards?.apr}%</b> APR{' '}
+						<Tooltip>
+							<TooltipTrigger>
+								<LucideInfo />
+							</TooltipTrigger>
+							<TooltipContent side={'bottom'}>
+								<p>Based on current network data, might change</p>
+								<p>
+									<b>{humanify(approximateDelegationRewards?.rewardsPerDay || 0n, 5)} VC </b> per day
+								</p>
+								<p>
+									<b>{humanify(approximateDelegationRewards?.rewardPerEpoch || 0n, 5)} VC </b> per epoch
+								</p>
+							</TooltipContent>
+						</Tooltip>
+					</p>
+				)}
 			</div>
 
 			<div className={'flex justify-center gap-6'}>

@@ -41,13 +41,6 @@ export default function Delegate() {
 				title={'Delegate'}
 				subtitle={"It's time to choose the validator you'd like to support."}
 			/>
-			{/*<span className={'text-sm'}>
-				TIP: Click on a validator&apos;s name to learn more about them!
-			</span>
-			<div className={'mt-3 flex gap-3'}>
-				<ValidatorCard />
-				<ValidatorCard />
-			</div>*/}
 			{account.isConnected ? (
 				<>
 					{screen === Screen.Warning && (
@@ -77,6 +70,7 @@ export default function Delegate() {
 						<DelegateDuration
 							/* Validator is already chosen here by a previous step */
 							validator={validator!}
+							amount={amount}
 							onDuration={(
 								duration: number,
 								relock: boolean,

@@ -14,10 +14,6 @@ import useAddressDelegations from '@/hooks/useAddressDelegations';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
-/*export const metadata: Metadata = {
-	title: 'VinuChain Staking Station - Delegations',
-	description: 'Check your delegations, rewards, and other information here.'
-};*/
 
 export default function Delegations() {
 	const account = useAccount();

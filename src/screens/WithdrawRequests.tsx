@@ -15,10 +15,6 @@ import useCurrentEpoch from '@/hooks/useCurrentEpoch';
 import useWithdrawalPeriods from '@/hooks/useWithdrawalPeriods';
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
-/*export const metadata: Metadata = {
-	title: 'VinuChain Staking Station - Delegations',
-	description: 'Check your delegations, rewards, and other information here.'
-};*/
 
 export default function WithdrawRequests() {
 	const account = useAccount();

@@ -8,11 +8,19 @@ import {
 	CardHeader,
 	CardTitle
 } from '@/components/ui/card';
+import useApproximateDelegationRewards from '@/hooks/useApproximateDelegationRewards';
 import useValidator from '@/hooks/useValidator';
 import useValidatorSocial from '@/hooks/useValidatorSocial';
 import humanify from '@/scripts/humanify';
 import Validator from '@/types/validator';
-import { Banknote, LucideClock, LucideCoins, LucideHandCoins, LucideLoader2 } from 'lucide-react';
+import {
+	LucideBanknote,
+	LucideCandlestickChart,
+	LucideClock,
+	LucideCoins,
+	LucideHandCoins,
+	LucideLoader2
+} from 'lucide-react';
 
 export default function ValidatorCard(props: {
 	id: bigint;
@@ -20,6 +28,10 @@ export default function ValidatorCard(props: {
 }) {
 	const validatorData = useValidator(props.id);
 	const validatorSocial = useValidatorSocial(validatorData?.socialInfoUrl || '');
+	const approximateDelegationRewards = useApproximateDelegationRewards(
+		10000000000000n,
+		(validatorData?.remainingLockedStakeDays || 0) * 86400
+	);
 	return validatorData ? (
 		<Card>
 			<CardHeader>
@@ -44,10 +56,13 @@ export default function ValidatorCard(props: {
 					<LucideHandCoins /> {humanify(validatorData.delegatedStake)} VC Delegated
 				</p>
 				<p className={'flex items-center gap-3'}>
-					<Banknote /> {humanify(validatorData.receivedStake)} VC Total stake
+					<LucideBanknote /> {humanify(validatorData.receivedStake)} VC Total stake
 				</p>
 				<p className={'flex items-center gap-3'}>
 					<LucideClock /> {validatorData.remainingLockedStakeDays} locked days left
+				</p>
+				<p className={'flex items-center gap-3'}>
+					<LucideCandlestickChart /> {approximateDelegationRewards?.apr}% Max APR
 				</p>
 			</CardContent>
 			{props.onSelected && (

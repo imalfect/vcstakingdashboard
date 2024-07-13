@@ -15,6 +15,7 @@ import { TooltipButton } from '@/components/ui/tooltip-button';
 import sfc from '@/config/contracts/sfc';
 import claimRewards from '@/generators/write/claimRewards';
 import restakeRewards from '@/generators/write/restakeRewards';
+import useApproximateDelegationRewards from '@/hooks/useApproximateDelegationRewards';
 import useValidator from '@/hooks/useValidator';
 import useValidatorSocial from '@/hooks/useValidatorSocial';
 import humanify from '@/scripts/humanify';
@@ -24,6 +25,7 @@ import dayjs from 'dayjs';
 import {
 	Banknote,
 	LucideCalendarClock,
+	LucideCandlestickChart,
 	LucideCoins,
 	LucideHandCoins,
 	LucideLandmark
@@ -42,6 +44,15 @@ export default function DelegationCard(props: { delegation: Delegation }) {
 	const validatorSocial = useValidatorSocial(validatorData?.socialInfoUrl || '');
 	const [transactions, setTransactions] = useState<TransactionProp[]>([]);
 	const [processorActive, setProcessorActive] = useState(false);
+	const approximateLockedDelegationRewards = useApproximateDelegationRewards(
+		props.delegation.lockedAmount,
+		props.delegation.lockedDelegation
+			? dayjs().diff(dayjs.unix(Number(props.delegation.lockedDelegation?.endTime) || 0), 'seconds')
+			: 0
+	);
+	const approximateUnlockedDelegationRewards = useApproximateDelegationRewards(
+		props.delegation.unlockedAmount
+	);
 	const executeTransaction = (type: DelegationCardTransactionType) => {
 		switch (type) {
 			case DelegationCardTransactionType.Claim:
@@ -86,6 +97,21 @@ export default function DelegationCard(props: { delegation: Delegation }) {
 						{props.delegation.lockedDelegation?.endTime
 							? `Locked for ${dayjs.unix(Number(props.delegation.lockedDelegation?.endTime)).diff(dayjs(), 'days')} days`
 							: 'No locked delegation'}
+					</p>
+					<p className={'flex items-center gap-3'}>
+						<LucideCandlestickChart />{' '}
+						{(
+							((!isNaN(Number(approximateLockedDelegationRewards?.apr))
+								? parseFloat(approximateLockedDelegationRewards?.apr || '0')
+								: 0) +
+								(!isNaN(Number(approximateUnlockedDelegationRewards?.apr))
+									? parseFloat(approximateUnlockedDelegationRewards?.apr || '0')
+									: 0)) /
+							(approximateLockedDelegationRewards?.apr && approximateUnlockedDelegationRewards?.apr
+								? 2
+								: 1)
+						).toFixed(2)}
+						% approx. APR
 					</p>
 					<p className={'flex items-center gap-3'}>
 						<LucideLandmark /> {humanify(props.delegation.claimableRewards, 3)} VC Claimable Rewards
