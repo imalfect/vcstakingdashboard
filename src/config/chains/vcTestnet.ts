@@ -20,11 +20,11 @@ export default {
 	blockExplorers: {
 		etherscan: {
 			name: 'VinuScan',
-			url: 'https://testnet.vinuscan.com/'
+			url: 'https://testnet.vinuscan.com'
 		},
 		default: {
 			name: 'VinuScan',
-			url: 'https://testnet.vinuscan.com/'
+			url: 'https://testnet.vinuscan.com'
 		}
 	},
 	contracts: {
