@@ -10,20 +10,24 @@ export default function useApproximateDelegationRewards(stake: bigint, lockDurat
 	const lastEpochSnapshot = useEpochSnapshot(currentEpoch - 1n);
 	const percentage = 0.3 + 0.00191780785714286 * ((lockDuration || 0) / 86400);
 	if (!baseRPS || !lastEpochSnapshot) return null;
+	if (stake === 0n) return null;
 
 	// @ts-ignore bignumber supports bigint
 	const rewardPerEpoch = new BigNumber(EPOCH_DURATION_SECONDS)
 		// @ts-ignore
 		.times(baseRPS)
-		// @ts-ignore
-		.times(new BigNumber(stake).div(lastEpochSnapshot.totalBaseRewardWeight))
+		.times(
+			// @ts-ignore
+			new BigNumber(stake).shiftedBy(18).div(lastEpochSnapshot.totalBaseRewardWeight)
+		)
 		.times(percentage)
 		.times(1 - 0.15);
+	console.log(rewardPerEpoch);
 	const rewardsPerDay = rewardPerEpoch.times(86400 / Number(EPOCH_DURATION_SECONDS));
 	return {
 		rewardPerEpoch: BigInt(rewardPerEpoch.toFixed(0)),
 		rewardsPerDay: BigInt(rewardsPerDay.toFixed(0)),
-		apr: rewardsPerDay.times(365).div(stake.toString()).times(100).toFixed(2)
+		apr: rewardsPerDay.times(365).div(new BigNumber(stake).shiftedBy(18)).times(100).toFixed(2)
 	};
 }
 
