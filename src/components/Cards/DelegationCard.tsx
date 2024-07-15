@@ -98,21 +98,16 @@ export default function DelegationCard(props: { delegation: Delegation }) {
 							? `Locked for ${dayjs.unix(Number(props.delegation.lockedDelegation?.endTime)).diff(dayjs(), 'days')} days`
 							: 'No locked delegation'}
 					</p>
-					<p className={'flex items-center gap-3'}>
-						<LucideCandlestickChart />{' '}
-						{(
-							((!isNaN(Number(approximateLockedDelegationRewards?.apr))
-								? parseFloat(approximateLockedDelegationRewards?.apr || '0')
-								: 0) +
-								(!isNaN(Number(approximateUnlockedDelegationRewards?.apr))
-									? parseFloat(approximateUnlockedDelegationRewards?.apr || '0')
-									: 0)) /
-							(approximateLockedDelegationRewards?.apr && approximateUnlockedDelegationRewards?.apr
-								? 2
-								: 1)
-						).toFixed(2)}
-						% approx. APR
-					</p>
+					{props.delegation.lockedDelegation && (
+						<p className={'flex items-center gap-3'}>
+							<LucideCandlestickChart /> {approximateLockedDelegationRewards?.apr}% locked APR
+						</p>
+					)}
+					{props.delegation.unlockedAmount > 0n && (
+						<p className={'flex items-center gap-3'}>
+							<LucideCandlestickChart /> {approximateUnlockedDelegationRewards?.apr}% unlocked APR
+						</p>
+					)}
 					<p className={'flex items-center gap-3'}>
 						<LucideLandmark /> {humanify(props.delegation.claimableRewards, 3)} VC Claimable Rewards
 					</p>

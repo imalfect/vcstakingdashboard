@@ -1,1 +1,1 @@
-export const EPOCH_DURATION_SECONDS = BigInt(4 * 60 * 60);
+export const EPOCH_DURATION_SECONDS = 4 * 60 * 60;

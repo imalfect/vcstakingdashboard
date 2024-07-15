@@ -6,29 +6,31 @@ import BigNumber from 'bignumber.js';
 
 export default function useApproximateDelegationRewards(stake: bigint, lockDuration?: number) {
 	const baseRPS = useBaseRewardPerSecond();
+	console.log(`Base reward per second is ${baseRPS}`);
 	const currentEpoch = useCurrentEpoch();
 	const lastEpochSnapshot = useEpochSnapshot(currentEpoch - 1n);
-	const percentage = 0.3 + 0.00191780785714286 * ((lockDuration || 0) / 86400);
+	console.log(lockDuration);
+	const percentage = new BigNumber('0.3').plus(
+		new BigNumber('0.00191780785714286').times(new BigNumber(lockDuration || 0).div(86400))
+	);
 	if (!baseRPS || !lastEpochSnapshot) return null;
 	if (stake === 0n) return null;
 
-	// @ts-ignore bignumber supports bigint
 	const rewardPerEpoch = new BigNumber(EPOCH_DURATION_SECONDS)
-		// @ts-ignore
-		.times(baseRPS)
-		.times(
-			// @ts-ignore
-			new BigNumber(stake).shiftedBy(18).div(lastEpochSnapshot.totalBaseRewardWeight)
-		)
+		.times(baseRPS.toString())
+		.times(new BigNumber(stake.toString()).div(lastEpochSnapshot.totalBaseRewardWeight.toString()))
 		.times(percentage)
 		.times(1 - 0.15);
-	console.log(rewardPerEpoch);
-	const rewardsPerDay = rewardPerEpoch.times(86400 / Number(EPOCH_DURATION_SECONDS));
+	const rewardsPerDay = rewardPerEpoch.times(86400 / EPOCH_DURATION_SECONDS);
+	console.log(stake);
+	console.log(
+		`Reward per day is ${rewardsPerDay.shiftedBy(-18)} on a stake of ${new BigNumber(stake.toString()).shiftedBy(-18)}`
+	);
+	console.log(`Reward per year is ${rewardsPerDay.times(365).shiftedBy(-18)}`);
 	return {
-		rewardPerEpoch: BigInt(rewardPerEpoch.shiftedBy(-18).toFixed(0)),
-		rewardsPerDay: BigInt(rewardsPerDay.shiftedBy(-18).toFixed(0)),
-		// @ts-ignore
-		apr: rewardsPerDay.times(365).div(new BigNumber(stake).shiftedBy(18)).times(100).toFixed(2)
+		rewardPerEpoch: BigInt(rewardPerEpoch.toFixed(0)),
+		rewardsPerDay: BigInt(rewardsPerDay.toFixed(0)),
+		apr: rewardsPerDay.times(365).div(stake.toString()).times(100).toFixed(2)
 	};
 }
 
