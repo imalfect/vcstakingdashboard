@@ -25,8 +25,9 @@ export default function useApproximateDelegationRewards(stake: bigint, lockDurat
 	console.log(rewardPerEpoch);
 	const rewardsPerDay = rewardPerEpoch.times(86400 / Number(EPOCH_DURATION_SECONDS));
 	return {
-		rewardPerEpoch: BigInt(rewardPerEpoch.toFixed(0)),
-		rewardsPerDay: BigInt(rewardsPerDay.toFixed(0)),
+		rewardPerEpoch: BigInt(rewardPerEpoch.shiftedBy(-18).toFixed(0)),
+		rewardsPerDay: BigInt(rewardsPerDay.shiftedBy(-18).toFixed(0)),
+		// @ts-ignore
 		apr: rewardsPerDay.times(365).div(new BigNumber(stake).shiftedBy(18)).times(100).toFixed(2)
 	};
 }
