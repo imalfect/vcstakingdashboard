@@ -11,7 +11,7 @@ export default function useApproximateDelegationRewards(stake: bigint, lockDurat
 	const lastEpochSnapshot = useEpochSnapshot(currentEpoch - 1n);
 	console.log(lockDuration);
 	const percentage = new BigNumber('0.3').plus(
-		new BigNumber('0.00191780785714286').times(new BigNumber(lockDuration || 0).div(86400))
+		new BigNumber('0.00191780785714286').times(new BigNumber(lockDuration || 0))
 	);
 	if (!baseRPS || !lastEpochSnapshot) return null;
 	if (stake === 0n) return null;
