@@ -30,7 +30,7 @@ export default function DelegateDuration(props: {
 	const [relockNoticeOpened, setRelockNoticeOpened] = useState(false);
 	const approximateDelegationRewards = useApproximateDelegationRewards(
 		props.amount,
-		duration !== 0 ? dayjs.unix(duration).diff(dayjs(), 'seconds') : 0
+		duration !== 0 ? dayjs.unix(duration).diff(dayjs(), 'days') : 0
 	);
 	useEffect(() => {
 		if (previousLockedDelegation !== null && !relockNoticeOpened) {
@@ -79,10 +79,10 @@ export default function DelegateDuration(props: {
 						<TooltipContent side={'bottom'}>
 							<p>Based on current network data, might change</p>
 							<p>
-								<b>{humanify(approximateDelegationRewards?.rewardsPerDay || 0n, 5)} VC </b> per day
+								<b>{humanify(BigInt(approximateDelegationRewards?.rewardsPerDay || 0n), 5)} VC </b> per day
 							</p>
 							<p>
-								<b>{humanify(approximateDelegationRewards?.rewardPerEpoch || 0n, 5)} VC </b> per epoch
+								<b>{humanify(BigInt(approximateDelegationRewards?.rewardPerEpoch || 0n), 5)} VC </b> per epoch
 							</p>
 						</TooltipContent>
 					</Tooltip>

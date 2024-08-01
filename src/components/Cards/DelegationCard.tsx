@@ -47,11 +47,12 @@ export default function DelegationCard(props: { delegation: Delegation }) {
 	const approximateLockedDelegationRewards = useApproximateDelegationRewards(
 		props.delegation.lockedAmount,
 		props.delegation.lockedDelegation
-			? dayjs().diff(dayjs.unix(Number(props.delegation.lockedDelegation?.endTime) || 0), 'seconds')
+			? dayjs().diff(dayjs.unix(Number(props.delegation.lockedDelegation?.endTime) || 0), 'days')
 			: 0
 	);
 	const approximateUnlockedDelegationRewards = useApproximateDelegationRewards(
-		props.delegation.unlockedAmount
+		props.delegation.unlockedAmount,
+		0
 	);
 	const executeTransaction = (type: DelegationCardTransactionType) => {
 		switch (type) {

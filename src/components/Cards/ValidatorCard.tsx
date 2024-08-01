@@ -29,8 +29,8 @@ export default function ValidatorCard(props: {
 	const validatorData = useValidator(props.id);
 	const validatorSocial = useValidatorSocial(validatorData?.socialInfoUrl || '');
 	const approximateDelegationRewards = useApproximateDelegationRewards(
-		10000000000000000n,
-		(validatorData?.remainingLockedStakeDays || 0) * 86400
+		100000000000n,
+		(validatorData?.remainingLockedStakeDays || 0)
 	);
 	return validatorData ? (
 		<Card>
