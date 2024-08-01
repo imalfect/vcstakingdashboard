@@ -4,33 +4,37 @@ import useCurrentEpoch from '@/hooks/useCurrentEpoch';
 import useEpochSnapshot from '@/hooks/useEpochSnapshot';
 import BigNumber from 'bignumber.js';
 
-export default function useApproximateDelegationRewards(stake: bigint, lockDuration?: number) {
-	const baseRPS = useBaseRewardPerSecond();
+export default function useApproximateDelegationRewards(stake: bigint, lockDuration: number) {
+	const baseRPS = Number(useBaseRewardPerSecond()) / 1e18;
+	const newstake = Number(stake) / 1e18;
 	console.log(`Base reward per second is ${baseRPS}`);
 	const currentEpoch = useCurrentEpoch();
 	const lastEpochSnapshot = useEpochSnapshot(currentEpoch - 1n);
 	console.log(lockDuration);
-	const percentage = new BigNumber('0.3').plus(
-		new BigNumber('0.00191780785714286').times(new BigNumber(lockDuration || 0))
-	);
+	const percentage = Number(0.3) + Number(0.00191780785714286) * (Math.abs(lockDuration || 0));
 	if (!baseRPS || !lastEpochSnapshot) return null;
 	if (stake === 0n) return null;
 
-	const rewardPerEpoch = new BigNumber(EPOCH_DURATION_SECONDS)
-		.times(baseRPS.toString())
-		.times(new BigNumber(stake.toString()).div(lastEpochSnapshot.totalBaseRewardWeight.toString()))
-		.times(percentage)
-		.times(1 - 0.15);
-	const rewardsPerDay = rewardPerEpoch.times(86400 / EPOCH_DURATION_SECONDS);
-	console.log(stake);
+	const baserewardl = 25893832
+
+	const rewardPerEpoch = (((EPOCH_DURATION_SECONDS) * (baseRPS)) * (newstake / baserewardl) * (Number(percentage) * (1 - 0.15)));
+
+	const rewardsPerDay = rewardPerEpoch * (6);
+	console.log("stake", newstake);
+	console.log("reward weight" , Number(lastEpochSnapshot.totalBaseRewardWeight) / 1e18);
+	console.log(rewardPerEpoch);
+	console.log(EPOCH_DURATION_SECONDS);
+	console.log("base rew per sec", (baseRPS));
 	console.log(
-		`Reward per day is ${rewardsPerDay.shiftedBy(-18)} on a stake of ${new BigNumber(stake.toString()).shiftedBy(-18)}`
+		`Reward per day is ${(rewardsPerDay)} on a stake of ${newstake}`
 	);
-	console.log(`Reward per year is ${rewardsPerDay.times(365).shiftedBy(-18)}`);
+	console.log(`Reward per year is ${rewardsPerDay * (365)}`);
+	console.log("lockdate", lockDuration * -1);
+	console.log("percentage", percentage);
 	return {
-		rewardPerEpoch: BigInt(rewardPerEpoch.toFixed(0)),
-		rewardsPerDay: BigInt(rewardsPerDay.toFixed(0)),
-		apr: rewardsPerDay.times(365).div(stake.toString()).times(100).toFixed(2)
+		rewardPerEpoch: (rewardPerEpoch.toFixed(0)),
+		rewardsPerDay: (rewardsPerDay.toFixed(0)),
+		apr: ((rewardsPerDay * (365) / (Number(stake) / 1e18)) * (100)).toFixed(2)
 	};
 }
 
@@ -41,3 +45,5 @@ export default function useApproximateDelegationRewards(stake: bigint, lockDurat
 //
 // Delegator Reward per epoch (unlocked stake):
 // delegator_BaseReward = (epochDuration * baseRewardPerSecond) * [(delegatorStake * (validatorEpochUptime/epochDuration)^2) / totalBaseRewardWeight] * 0.30 * (1 - 0.15)
+
+

@@ -30,7 +30,7 @@ export default function DelegateDuration(props: {
 	const [relockNoticeOpened, setRelockNoticeOpened] = useState(false);
 	const approximateDelegationRewards = useApproximateDelegationRewards(
 		props.amount,
-		duration !== 0 ? dayjs.unix(duration).diff(dayjs(), 'seconds') : 0
+		duration !== 0 ? dayjs.unix(duration).diff(dayjs(), 'days') : 0
 	);
 	useEffect(() => {
 		if (previousLockedDelegation !== null && !relockNoticeOpened) {
