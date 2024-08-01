@@ -51,7 +51,8 @@ export default function DelegationCard(props: { delegation: Delegation }) {
 			: 0
 	);
 	const approximateUnlockedDelegationRewards = useApproximateDelegationRewards(
-		props.delegation.unlockedAmount
+		props.delegation.unlockedAmount,
+		0
 	);
 	const executeTransaction = (type: DelegationCardTransactionType) => {
 		switch (type) {
