@@ -11,5 +11,5 @@ export default function useBaseRewardPerSecond() {
 		address: typedChain?.contracts.sfc.address,
 		functionName: 'baseRewardPerSecond'
 	});
-	return baseRPS.data as bigint | null;
+	return (baseRPS.data as bigint) || 0n;
 }

@@ -1,18 +1,18 @@
 'use client';
-import DelegateAmount from '@/components/Delegate/Amount';
-import DelegateDuration from '@/components/Delegate/Duration';
-import DelegateFinalize from '@/components/Delegate/Finalize';
-import DelegateFinish from '@/components/Delegate/Finish';
-import DelegateValidators from '@/components/Delegate/Validators';
-import DelegateWarning from '@/components/Delegate/Warning';
 import PageHeader from '@/components/Misc/PageHeader';
 import WalletNotConnected from '@/components/Misc/WalletNotConnected';
 import { LockedDelegation } from '@/types/lockedDelegation';
 import Validator from '@/types/validator';
+import DelegateAmount from '@/views/Delegate/Amount';
+import DelegateDuration from '@/views/Delegate/Duration';
+import DelegateFinalize from '@/views/Delegate/Finalize';
+import DelegateFinish from '@/views/Delegate/Finish';
+import DelegateValidators from '@/views/Delegate/Validators';
+import DelegateWarning from '@/views/Delegate/Warning';
 import { useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 import { useAccount } from 'wagmi';
-enum Screen {
+enum View {
 	Warning,
 	Validators,
 	Amount,
@@ -26,13 +26,8 @@ export default function Delegate() {
 	const [duration, setDuration] = useState(0);
 	const [previousLockedDelegation, setPreviousLockedDelegation] = useState<LockedDelegation>();
 	const [success, setSuccess] = useState(false);
-	const [didAcknowledgeWarning, setdidAcknowledgeWarning] = useLocalStorage(
-		'delegate-warning-acknowledged',
-		false
-	);
-	const [screen, setScreen] = useState<Screen>(
-		didAcknowledgeWarning ? Screen.Validators : Screen.Warning
-	);
+	const [didAcknowledgeWarning] = useLocalStorage('delegate-warning-acknowledged', false);
+	const [view, setView] = useState<View>(didAcknowledgeWarning ? View.Validators : View.Warning);
 	const account = useAccount();
 	return (
 		<main className={'flex min-h-screen flex-col items-center justify-center px-6'}>
@@ -43,30 +38,30 @@ export default function Delegate() {
 			/>
 			{account.isConnected ? (
 				<>
-					{screen === Screen.Warning && (
+					{view === View.Warning && (
 						<DelegateWarning
 							onAccepted={() => {
-								setScreen(Screen.Validators);
+								setView(View.Validators);
 							}}
 						/>
 					)}
-					{screen === Screen.Validators && (
+					{view === View.Validators && (
 						<DelegateValidators
 							onValidator={(validator: Validator) => {
 								setValidator(validator);
-								setScreen(Screen.Amount);
+								setView(View.Amount);
 							}}
 						/>
 					)}
-					{screen === Screen.Amount && (
+					{view === View.Amount && (
 						<DelegateAmount
 							onAmount={(amount: bigint) => {
 								setAmount(amount);
-								setScreen(Screen.Duration);
+								setView(View.Duration);
 							}}
 						/>
 					)}
-					{screen === Screen.Duration && (
+					{view === View.Duration && (
 						<DelegateDuration
 							/* Validator is already chosen here by a previous step */
 							validator={validator!}
@@ -77,14 +72,14 @@ export default function Delegate() {
 								previousLockedDelegation?: LockedDelegation | null
 							) => {
 								setDuration(duration);
-								setScreen(Screen.Finalize);
+								setView(View.Finalize);
 								if (relock && previousLockedDelegation) {
 									setPreviousLockedDelegation(previousLockedDelegation as LockedDelegation);
 								}
 							}}
 						/>
 					)}
-					{screen === Screen.Finalize && (
+					{view === View.Finalize && (
 						<DelegateFinalize
 							amount={amount}
 							duration={duration}
@@ -92,21 +87,21 @@ export default function Delegate() {
 							previousDelegation={previousLockedDelegation}
 							onFail={() => {
 								setSuccess(false);
-								setScreen(Screen.Finish);
+								setView(View.Finish);
 							}}
 							onSuccess={() => {
 								setSuccess(true);
-								setScreen(Screen.Finish);
+								setView(View.Finish);
 							}}
 							onRestart={() => {
 								setValidator(null);
 								setAmount(0n);
 								setDuration(0);
-								setScreen(Screen.Warning);
+								setView(View.Warning);
 							}}
 						/>
 					)}
-					{screen === Screen.Finish && <DelegateFinish success={success} />}
+					{view === View.Finish && <DelegateFinish success={success} />}
 				</>
 			) : (
 				<WalletNotConnected />

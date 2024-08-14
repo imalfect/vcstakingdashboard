@@ -9,5 +9,8 @@ export interface VinuChain {
 		stake: {
 			address: Address;
 		};
+		payback: {
+			address: Address;
+		};
 	};
 }

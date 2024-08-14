@@ -8,15 +8,15 @@ import withdrawDelegation from '@/generators/write/withdrawDelegation';
 import useValidator from '@/hooks/useValidator';
 import useValidatorSocial from '@/hooks/useValidatorSocial';
 import humanify from '@/scripts/humanify';
+import { DelegationWithdrawRequest } from '@/types/delegationWithdrawRequest';
 import { VinuChain } from '@/types/vinuChain';
-import { WithdrawRequest } from '@/types/withdrawRequest';
 import dayjs from 'dayjs';
 import { LucideClock, LucideCoins, LucideCuboid, LucideFileDigit } from 'lucide-react';
 import { useContext, useState } from 'react';
 import { Chain } from 'viem';
 import { useClient } from 'wagmi';
-export default function WithdrawRequestCard(props: {
-	withdrawRequest: WithdrawRequest;
+export default function DelegationWithdrawRequestCard(props: {
+	withdrawRequest: DelegationWithdrawRequest;
 	withdrawalPeriods: { time: bigint; epochs: bigint };
 	currentEpoch: bigint;
 }) {

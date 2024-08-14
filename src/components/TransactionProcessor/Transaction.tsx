@@ -31,6 +31,7 @@ export default function TransactionProcessorTransaction(props: { id: number }) {
 			previousTransaction?.status !== 'pending'
 		) {
 			console.log(`Requesting signature of transaction ${thisTransaction.id}`);
+			console.log(thisTransaction);
 			writeContractAsync(thisTransaction.wagmiTransaction as unknown as WriteContractParameters)
 				.then((hash) => {
 					dispatch({
@@ -42,6 +43,7 @@ export default function TransactionProcessorTransaction(props: { id: number }) {
 					});
 				})
 				.catch((error) => {
+					console.error(error.message);
 					dispatch({
 						type: 'transaction_failed',
 						payload: {

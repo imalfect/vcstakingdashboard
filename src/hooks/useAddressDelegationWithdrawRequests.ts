@@ -1,19 +1,26 @@
 import sfc from '@/config/contracts/sfc';
-import getWrRequests from '@/generators/read/getWrRequests';
+import getDelegationWithdrawRequests from '@/generators/read/getDelegationWithdrawRequests';
 import useLastValidatorId from '@/hooks/useLastValidatorId';
+import { DelegationWithdrawRequest } from '@/types/delegationWithdrawRequest';
 import { VinuChain } from '@/types/vinuChain';
-import { WithdrawRequest } from '@/types/withdrawRequest';
 import { Address, Chain } from 'viem';
 import { useClient, useReadContracts } from 'wagmi';
 
-export default function useAddressWithdrawRequests(address: Address): WithdrawRequest[] {
+export default function useAddressDelegationWithdrawRequests(
+	address: Address
+): DelegationWithdrawRequest[] {
 	const client = useClient();
 	const typedChain = client?.chain as (Chain & VinuChain) | undefined;
 	const lastValidatorId = useLastValidatorId();
 	const validatorIds = Array.from({ length: Number(lastValidatorId) }, (_, i) => i + 1);
 	const withdrawRequests = useReadContracts({
 		contracts: validatorIds.map((validatorId) =>
-			getWrRequests(sfc, typedChain?.contracts.sfc.address || '0x0', BigInt(validatorId), address)
+			getDelegationWithdrawRequests(
+				sfc,
+				typedChain?.contracts.sfc.address || '0x0',
+				BigInt(validatorId),
+				address
+			)
 		)
 	}).data as {
 		status: 'success' | 'failure';
@@ -44,9 +51,9 @@ export default function useAddressWithdrawRequests(address: Address): WithdrawRe
 					epoch: singleWithdrawRequest.epoch,
 					time: singleWithdrawRequest.time,
 					amount: singleWithdrawRequest.amount
-				} as WithdrawRequest;
+				} as DelegationWithdrawRequest;
 			});
 		})
 		.flat()
-		.filter((delegation) => delegation !== null) as WithdrawRequest[];
+		.filter((delegation) => delegation !== null) as DelegationWithdrawRequest[];
 }

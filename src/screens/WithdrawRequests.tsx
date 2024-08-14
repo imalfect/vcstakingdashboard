@@ -1,5 +1,5 @@
 'use client';
-import WithdrawRequestCard from '@/components/Cards/WithdrawRequestCard';
+import DelegationWithdrawRequestCard from '@/components/Cards/DelegationWithdrawRequestCard';
 import { UpdateContext } from '@/components/Contexts/UpdateContext';
 import PageHeader from '@/components/Misc/PageHeader';
 import WalletNotConnected from '@/components/Misc/WalletNotConnected';
@@ -10,7 +10,7 @@ import {
 	CarouselNext,
 	CarouselPrevious
 } from '@/components/ui/carousel';
-import useAddressWithdrawRequests from '@/hooks/useAddressWithdrawRequests';
+import useAddressDelegationWithdrawRequests from '@/hooks/useAddressDelegationWithdrawRequests';
 import useCurrentEpoch from '@/hooks/useCurrentEpoch';
 import useWithdrawalPeriods from '@/hooks/useWithdrawalPeriods';
 import { useState } from 'react';
@@ -19,7 +19,7 @@ import { useAccount } from 'wagmi';
 export default function WithdrawRequests() {
 	const account = useAccount();
 	const [address, setAddress] = useState(account.address);
-	const withdrawRequests = useAddressWithdrawRequests(address || '0x0');
+	const withdrawRequests = useAddressDelegationWithdrawRequests(address || '0x0');
 	const withdrawalPeriods = useWithdrawalPeriods();
 	const currentEpoch = useCurrentEpoch();
 	const update = () => {
@@ -46,7 +46,7 @@ export default function WithdrawRequests() {
 												key={`wr${withdrawRequest.id}v${withdrawRequest.validatorId}`}
 												className={'basis-auto'}
 											>
-												<WithdrawRequestCard
+												<DelegationWithdrawRequestCard
 													withdrawRequest={withdrawRequest}
 													withdrawalPeriods={withdrawalPeriods}
 													currentEpoch={currentEpoch}

@@ -1,4 +1,4 @@
-export interface WithdrawRequest {
+export interface DelegationWithdrawRequest {
 	id: bigint;
 	validatorId: bigint;
 	epoch: bigint;

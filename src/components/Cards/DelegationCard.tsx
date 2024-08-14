@@ -99,7 +99,7 @@ export default function DelegationCard(props: { delegation: Delegation }) {
 							? `Locked for ${dayjs.unix(Number(props.delegation.lockedDelegation?.endTime)).diff(dayjs(), 'days')} days`
 							: 'No locked delegation'}
 					</p>
-					{props.delegation.lockedDelegation && (
+					{props.delegation.lockedDelegation && approximateLockedDelegationRewards?.apr && (
 						<p className={'flex items-center gap-3'}>
 							<LucideCandlestickChart /> {approximateLockedDelegationRewards?.apr}% locked APR
 						</p>

@@ -34,6 +34,9 @@ export default {
 		},
 		stake: {
 			address: '0xb914a0b16111BaB228ae6214e6E1FD4a5EaE877C'
+		},
+		payback: {
+			address: '0x1c4269fbbd4a8254f69383eef6af720bcd0acda6'
 		}
 	}
 } as const satisfies Chain & VinuChain;
