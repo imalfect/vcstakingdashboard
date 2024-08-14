@@ -19,18 +19,6 @@ export default function useApproximateDelegationRewards(stake: bigint, lockDurat
 
 	const rewardsPerDay = rewardPerEpoch * (6);
 	
-	/* console.log("stake", newstake);
-	console.log(`Base reward per second is ${baseRPS}`);
-	console.log("stake", newstake);
-	console.log("reward weight" , Number(lastEpochSnapshot.totalBaseRewardWeight) / 1e18);
-	console.log(rewardPerEpoch);
-	console.log(EPOCH_DURATION_SECONDS);
-	console.log("base rew per sec", (baseRPS));
-	console.log(
-		`Reward per day is ${(rewardsPerDay)} on a stake of ${newstake}`
-	);
-	console.log(`Reward per year is ${rewardsPerDay * (365)}`);
-	console.log("percentage", percentage); */
 	return {
 		rewardPerEpoch: (rewardPerEpoch.toFixed(0)),
 		rewardsPerDay: (rewardsPerDay.toFixed(0)),
