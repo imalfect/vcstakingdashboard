@@ -15,6 +15,7 @@ import Validator from '@/types/validator';
 export default function DelegateValidators(props: { onValidator: (validator: Validator) => void }) {
 	const epoch = useCurrentEpoch();
 	const activeValidators = useActiveValidators(epoch || BigInt(0));
+	// Randomize the order of the validators
 	return (
 		<div className={'flex flex-col items-center justify-center gap-6'}>
 			<PageHeader
@@ -23,11 +24,13 @@ export default function DelegateValidators(props: { onValidator: (validator: Val
 			/>
 			<Carousel className={'w-96 lg:w-[48rem] xl:w-[72rem]'}>
 				<CarouselContent>
-					{activeValidators?.map((validatorId) => (
-						<CarouselItem key={validatorId} className={'lg:basis-1/2 xl:basis-1/3'}>
-							<ValidatorCard id={validatorId} onSelected={props.onValidator} />
-						</CarouselItem>
-					))}
+					{activeValidators
+						?.sort(() => Math.random() - 0.5)
+						.map((validatorId) => (
+							<CarouselItem key={validatorId} className={'lg:basis-1/2 xl:basis-1/3'}>
+								<ValidatorCard id={validatorId} onSelected={props.onValidator} />
+							</CarouselItem>
+						))}
 				</CarouselContent>
 				<CarouselPrevious />
 				<CarouselNext />
