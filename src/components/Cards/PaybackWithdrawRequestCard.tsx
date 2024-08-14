@@ -18,6 +18,7 @@ export default function PaybackWithdrawRequestCard(props: {
 	const client = useClient();
 	const typedChain = client?.chain as (Chain & VinuChain) | undefined;
 	const [processorActive, setProcessorActive] = useState(false);
+	// @ts-ignore
 	return (
 		<>
 			<Card className={'w-72'}>
@@ -56,7 +57,12 @@ export default function PaybackWithdrawRequestCard(props: {
 			</Card>
 			<TransactionProcessor
 				transactions={[
-					withdrawPayback(payback, typedChain?.contracts.payback.address!, props.withdrawRequest.id)
+					withdrawPayback(
+						payback,
+						// @ts-ignore
+						typedChain!.contracts.payback!.address || '0x0',
+						props.withdrawRequest.id
+					)
 				]}
 				onSuccess={() => {
 					setProcessorActive(false);

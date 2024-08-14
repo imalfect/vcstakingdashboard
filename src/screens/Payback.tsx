@@ -14,7 +14,7 @@ export enum View {
 }
 export default function Payback() {
 	const account = useAccount();
-	const [view, setView] = useState<View>(View.WithdrawRequests);
+	const [view, setView] = useState<View>(View.Home);
 	return (
 		<div className={'flex min-h-screen flex-col items-center justify-center'}>
 			{account.isConnected ? (

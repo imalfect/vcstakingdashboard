@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import useAddressPayback from '@/hooks/useAddressPayback';
 import { View } from '@/screens/Payback';
 import humanify from '@/scripts/humanify';
-import { LucideCoins, LucideHandCoins } from 'lucide-react';
+import { LucideCoins, LucideHandCoins, LucideMailbox } from 'lucide-react';
 import { useAccount } from 'wagmi';
 
 export default function PaybackHome(props: { setView: (view: View) => void }) {
@@ -35,6 +35,15 @@ export default function PaybackHome(props: { setView: (view: View) => void }) {
 						}}
 					>
 						<LucideHandCoins /> Unstake
+					</Button>
+					<Button
+						size={'lg'}
+						className={'gap-3'}
+						onClick={() => {
+							props.setView(View.WithdrawRequests);
+						}}
+					>
+						<LucideMailbox /> Withdrawal Requests
 					</Button>
 				</div>
 			</div>
