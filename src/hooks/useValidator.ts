@@ -60,7 +60,7 @@ export default function useValidator(validatorId: bigint): Validator | null {
 		selfStake: selfStake,
 		delegatedStake: validatorInfo[3] - selfStake,
 		lockedSelfStake: lockupInfo[0],
-		remainingLockedStakeDays: Math.floor(dayjs.unix(Number(lockupInfo[2])).diff(dayjs(), 'days')),
+		remainingLockedStakeDays: Math.max(0, Math.floor(dayjs.unix(Number(lockupInfo[2])).diff(dayjs(), 'days'))),
 		socialInfoUrl: socialInfo
 	};
 }
