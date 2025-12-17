@@ -1,3 +1,4 @@
+import { MAX_LOCK_DAYS } from '@/config/constants';
 import { DatePicker } from '@/components/ui/date-picker';
 import humanify from '@/scripts/humanify';
 import { unixify } from '@/scripts/unixify';
@@ -74,7 +75,7 @@ export default function RelockDelegationContent(props: {
 							: dayjs().add(14, 'days').toDate()
 					}
 					toDate={dayjs()
-						.add(props.validator?.remainingLockedStakeDays! - 1, 'days')
+						.add(Math.min(props.validator?.remainingLockedStakeDays! - 1, MAX_LOCK_DAYS), 'days')
 						.toDate()}
 					placeholder={'Choose a new lock date'}
 				/>
