@@ -3,6 +3,7 @@ import RelockNoticeModal from '@/components/Modals/RelockNoticeModal';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { MAX_LOCK_DAYS } from '@/config/constants';
 import useApproximateDelegationRewards from '@/hooks/useApproximateDelegationRewards';
 import useLockedDelegation from '@/hooks/useLockedDelegation';
 import humanify from '@/scripts/humanify';
@@ -66,7 +67,7 @@ export default function DelegateDuration(props: {
 							: dayjs().add(14, 'days').toDate()
 					}
 					toDate={dayjs()
-						.add(props.validator.remainingLockedStakeDays - 1, 'days')
+						.add(Math.min(props.validator.remainingLockedStakeDays - 1, MAX_LOCK_DAYS), 'days')
 						.toDate()}
 				/>
 

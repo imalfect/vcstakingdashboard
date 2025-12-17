@@ -17,7 +17,7 @@ export default function useApproximateDelegationRewards(stake: bigint, lockDurat
 
 	const rewardPerEpoch = (((EPOCH_DURATION_SECONDS) * (baseRPS)) * (newstake / Number(lastEpochSnapshot.totalBaseRewardWeight)) * (Number(percentage) * (1 - 0.15)));
 
-	const rewardsPerDay = rewardPerEpoch * (6);
+	const rewardsPerDay = rewardPerEpoch * (86400 / EPOCH_DURATION_SECONDS);
 	
 	return {
 		rewardPerEpoch: (rewardPerEpoch.toFixed(0)),
