@@ -42,13 +42,6 @@ export default function Home() {
 					About
 				</Button>
 			</div>
-			<Alert className={'mt-3 w-96'}>
-				<LucideAlertTriangle color={'#ff0000'} />
-				<AlertTitle>Beta software</AlertTitle>
-				<AlertDescription>
-					This product is in beta. Loss of funds may occur. Use at your own risk.
-				</AlertDescription>
-			</Alert>
 		</main>
 	);
 }
