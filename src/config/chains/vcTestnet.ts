@@ -3,6 +3,7 @@ import { Chain } from 'viem';
 
 export default {
 	id: 206,
+	testnet: true,
 	name: 'VinuChain Testnet',
 	nativeCurrency: {
 		decimals: 18,
@@ -34,10 +35,6 @@ export default {
 		},
 		stake: {
 			address: '0x6b39bcd174DddF5A17d065822BDC43353eB6112A'
-		},
-		payback: {
-			// TODO: Update this address
-			address: '0x1c4269f'
 		}
 	}
 } as const satisfies Chain & VinuChain;

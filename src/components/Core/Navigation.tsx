@@ -1,19 +1,19 @@
 'use client';
 import { TooltipButton } from '@/components/ui/tooltip-button';
-import { useWeb3Modal } from '@web3modal/wagmi/react';
+import { ConnectButton } from '@rainbow-me/rainbowkit/components';
 import {
 	LucideCoins,
 	LucideHandCoins,
 	LucideHome,
 	LucideInfo,
 	LucideMailbox,
+	LucideNetwork,
 	LucideReceiptText,
 	LucideWallet
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 export default function Navigation() {
 	const router = useRouter();
-	const { open } = useWeb3Modal();
 	return (
 		<div className={'flex items-end justify-center gap-3'}>
 			<TooltipButton message={'Home'} size={'icon'} onClick={() => router.push('/')}>
@@ -38,15 +38,46 @@ export default function Navigation() {
 			<TooltipButton message={'About'} size={'icon'} onClick={() => router.push('/about')}>
 				<LucideInfo />
 			</TooltipButton>
-			<TooltipButton
-				message={'Wallet'}
-				size={'icon'}
-				onClick={() => {
-					open();
-				}}
-			>
-				<LucideWallet />
-			</TooltipButton>
+			<ConnectButton.Custom>
+				{({ account, chain, mounted, openAccountModal, openChainModal, openConnectModal }) => (
+					<div
+						className={'flex gap-3'}
+						aria-hidden={!mounted}
+						style={{
+							opacity: mounted ? 1 : 0,
+							pointerEvents: mounted ? 'auto' : 'none'
+						}}
+					>
+						{account && chain && (
+							<TooltipButton
+								aria-label={'Network'}
+								message={'Switch network'}
+								size={'icon'}
+								onClick={openChainModal}
+							>
+								<LucideNetwork />
+							</TooltipButton>
+						)}
+						<TooltipButton
+							aria-label={'Wallet'}
+							message={'Wallet'}
+							size={'icon'}
+							disabled={!mounted}
+							onClick={() => {
+								if (!account || !chain) {
+									openConnectModal();
+								} else if (chain.unsupported) {
+									openChainModal();
+								} else {
+									openAccountModal();
+								}
+							}}
+						>
+							<LucideWallet />
+						</TooltipButton>
+					</div>
+				)}
+			</ConnectButton.Custom>
 		</div>
 	);
 }

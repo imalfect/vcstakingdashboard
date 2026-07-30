@@ -1,17 +1,31 @@
+import { useStakingSession } from '@/components/Contexts/StakingSession';
 import PageHeader from '@/components/Misc/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import humanify from '@/scripts/humanify';
-import BigNumber from 'bignumber.js';
+import { parseVcAmount } from '@/scripts/parseVcAmount';
 import { useState } from 'react';
-import { useAccount, useBalance } from 'wagmi';
-BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_DOWN });
+import { formatUnits } from 'viem';
+import { useBalance } from 'wagmi';
+
 export default function DelegateAmount(props: { onAmount: (amount: bigint) => void }) {
-	const account = useAccount();
+	const state = useStakingSession();
+	const session = state.status === 'supported' ? state.session : undefined;
 	const balance = useBalance({
-		address: account.address
+		address: session?.address,
+		chainId: session?.chain.id,
+		scopeKey: session ? `dashboard:${session.chain.id}` : undefined,
+		query: { enabled: Boolean(session?.address) }
 	});
 	const [amount, setAmount] = useState('');
+	const parsedAmount = parseVcAmount(amount);
+	const amountWei = parsedAmount.ok ? parsedAmount.amountWei : undefined;
+	const canContinue =
+		amountWei !== undefined &&
+		amountWei > 0n &&
+		balance.data !== undefined &&
+		amountWei <= balance.data.value;
+
 	return (
 		<div className={'flex flex-col items-center justify-center gap-6'}>
 			<PageHeader
@@ -21,19 +35,14 @@ export default function DelegateAmount(props: { onAmount: (amount: bigint) => vo
 			<div className={'flex flex-col items-center gap-1'}>
 				<div className={'flex w-full max-w-sm items-center space-x-2'}>
 					<Input
-						type="number"
+						type="text"
+						inputMode="decimal"
 						placeholder="10 VC"
 						value={amount}
-						onChange={(e) => {
-							setAmount(e.target.value);
-						}}
+						onChange={(event) => setAmount(event.target.value)}
 					/>
 					{balance.data && (
-						<Button
-							onClick={() => {
-								setAmount(new BigNumber(balance.data.value.toString()).shiftedBy(-18).toFixed(1));
-							}}
-						>
+						<Button onClick={() => setAmount(formatUnits(balance.data.value, 18))}>
 							Available Balance
 						</Button>
 					)}
@@ -46,15 +55,9 @@ export default function DelegateAmount(props: { onAmount: (amount: bigint) => vo
 			</div>
 			<Button
 				onClick={() => {
-					props.onAmount(BigInt(new BigNumber(amount).shiftedBy(18).toFixed(0)));
+					if (canContinue && amountWei !== undefined) props.onAmount(amountWei);
 				}}
-				disabled={
-					amount === '' ||
-					amount === '0' ||
-					(balance.data &&
-						balance.data.value < BigInt(new BigNumber(amount).shiftedBy(18).toFixed(0))) ||
-					parseFloat(amount) <= 0
-				}
+				disabled={!canContinue}
 				className={'px-12'}
 			>
 				Continue

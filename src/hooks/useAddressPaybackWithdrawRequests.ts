@@ -1,70 +1,62 @@
+import { useStakingSession } from '@/components/Contexts/StakingSession';
 import payback from '@/config/contracts/payback';
-import getPaybackWithdrawRequest from '@/generators/read/getPaybackWithdrawRequest';
 import { PaybackWithdrawRequest } from '@/types/paybackWithdrawRequest';
-import { VinuChain } from '@/types/vinuChain';
-import { Address, Chain } from 'viem';
-import { useClient, useReadContract, useReadContracts } from 'wagmi';
+import { Address } from 'viem';
+import { useReadContract } from 'wagmi';
 
 export default function useAddressPaybackWithdrawRequests(
-	address: Address
-): PaybackWithdrawRequest[] {
-	const client = useClient();
-	const typedChain = client?.chain as (Chain & VinuChain) | undefined;
+	address: Address,
+	paybackAddress: Address
+): {
+	data: readonly PaybackWithdrawRequest[];
+	isLoading: boolean;
+	error: Error | null;
+	refetch: () => Promise<void>;
+} {
+	const state = useStakingSession();
+	const session = state.status === 'supported' ? state.session : undefined;
+	const scopeKey = session ? `dashboard:${session.chain.id}` : undefined;
+	const enabled = Boolean(session);
 	const activeWithdrawRequestsCount = useReadContract({
-		address: typedChain?.contracts.payback.address || '0x0',
+		address: paybackAddress,
 		abi: payback,
+		chainId: session?.chain.id,
 		functionName: 'getNumberOfActiveWithdrawalRequestIDs',
-		args: [address]
+		args: [address],
+		scopeKey,
+		query: { enabled }
 	});
-	const activeWithdrawRequestsIDs = useReadContract({
-		address: typedChain?.contracts.payback.address || '0x0',
+	const count =
+		typeof activeWithdrawRequestsCount.data === 'bigint' ? activeWithdrawRequestsCount.data : null;
+	const activeWithdrawRequests = useReadContract({
+		address: paybackAddress,
 		abi: payback,
-		functionName: 'getActiveWithdrawalRequestIDs',
-		args: [address, 0n, activeWithdrawRequestsCount.data || 0n]
+		chainId: session?.chain.id,
+		functionName: 'getActiveWrRequests',
+		args: [address, 0n, count ?? 0n],
+		scopeKey,
+		query: { enabled: enabled && count !== null && count > 0n }
 	});
-	const withdrawRequests = useReadContracts({
-		contracts: activeWithdrawRequestsIDs.data?.map((id) =>
-			getPaybackWithdrawRequest(
-				payback,
-				typedChain?.contracts.payback.address || '0x0',
-				address,
-				BigInt(id)
-			)
-		)
-	});
-	if (!withdrawRequests.data) return [];
-	return withdrawRequests.data.map((withdrawRequest) => {
-		const typedResult = withdrawRequest.result as [bigint, bigint, bigint, bigint, boolean];
-		return {
-			id: typedResult[0],
-			time: typedResult[1],
-			amount: typedResult[2],
-			unlockTime: typedResult[3],
-			completed: typedResult[4]
-		};
-	});
-	/*if (withdrawRequests[0].status === 'failure') return [];
-	return ids
-		.map((id, index) => {
-			return withdrawRequests[index].result.map((singleWithdrawRequest, wrIndex) => {
-				if (
-					!(
-						singleWithdrawRequest.epoch &&
-						singleWithdrawRequest.time &&
-						singleWithdrawRequest.amount !== 0n
-					)
-				) {
-					return null;
-				}
-				return {
-					id: BigInt(wrIndex),
-					validatorId: BigInt(validatorId),
-					epoch: singleWithdrawRequest.epoch,
-					time: singleWithdrawRequest.time,
-					amount: singleWithdrawRequest.amount
-				} as DelegationWithdrawRequest;
-			});
-		})
-		.flat()
-		.filter((delegation) => delegation !== null) as DelegationWithdrawRequest[];*/
+	const data =
+		count === 0n
+			? []
+			: (activeWithdrawRequests.data ?? []).map((request) => ({
+					id: request.id,
+					time: request.time,
+					amount: request.amount,
+					unlockTime: request.unlockTime,
+					completed: request.completed
+				}));
+
+	return {
+		data,
+		isLoading:
+			activeWithdrawRequestsCount.isLoading ||
+			(count !== null && count > 0n && activeWithdrawRequests.isLoading),
+		error: activeWithdrawRequestsCount.error ?? activeWithdrawRequests.error,
+		refetch: async () => {
+			await activeWithdrawRequestsCount.refetch();
+			if (count !== null && count > 0n) await activeWithdrawRequests.refetch();
+		}
+	};
 }

@@ -1,41 +1,35 @@
-import { UpdateContext } from '@/components/Contexts/UpdateContext';
-import TransactionProcessor from '@/components/TransactionProcessor/Processor';
+import { useStakingSession } from '@/components/Contexts/StakingSession';
+import { useTransactionBatch } from '@/components/TransactionProcessor/context';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import sfc from '@/config/contracts/sfc';
 import withdrawDelegation from '@/generators/write/withdrawDelegation';
-import useValidator from '@/hooks/useValidator';
-import useValidatorSocial from '@/hooks/useValidatorSocial';
 import humanify from '@/scripts/humanify';
 import { DelegationWithdrawRequest } from '@/types/delegationWithdrawRequest';
-import { VinuChain } from '@/types/vinuChain';
+import type { ValidatorSocialInfo } from '@/types/socialInfo';
 import dayjs from 'dayjs';
 import { LucideClock, LucideCoins, LucideCuboid, LucideFileDigit } from 'lucide-react';
-import { useContext, useState } from 'react';
-import { Chain } from 'viem';
-import { useClient } from 'wagmi';
 export default function DelegationWithdrawRequestCard(props: {
 	withdrawRequest: DelegationWithdrawRequest;
 	withdrawalPeriods: { time: bigint; epochs: bigint };
 	currentEpoch: bigint;
+	social?: ValidatorSocialInfo;
 }) {
-	const update = useContext(UpdateContext);
-	const client = useClient();
-	const typedChain = client?.chain as (Chain & VinuChain) | undefined;
-	const validatorData = useValidator(props.withdrawRequest.validatorId);
-	const validatorSocial = useValidatorSocial(validatorData?.socialInfoUrl || '');
-	const [processorActive, setProcessorActive] = useState(false);
+	const state = useStakingSession();
+	const session = state.status === 'supported' ? state.session : undefined;
+	const sfcAddress = session?.chain.contracts.sfc.address;
+	const transactionBatch = useTransactionBatch();
 	return (
 		<>
 			<Card className={'w-72'}>
 				<CardHeader>
 					<CardTitle className={'flex items-center gap-3'}>
 						<Avatar>
-							<AvatarImage src={validatorSocial?.logoUrl} />
+							<AvatarImage src={props.social?.logoUrl} />
 							<AvatarFallback>{props.withdrawRequest.validatorId.toString()}</AvatarFallback>
 						</Avatar>
-						{validatorSocial?.name || `Validator ${props.withdrawRequest.validatorId}`}
+						{props.social?.name || `Validator ${props.withdrawRequest.validatorId}`}
 					</CardTitle>
 				</CardHeader>
 				<CardContent className={'flex flex-col gap-3'}>
@@ -64,36 +58,26 @@ export default function DelegationWithdrawRequestCard(props: {
 					<Button
 						className={'ml-auto'}
 						disabled={
+							!sfcAddress ||
 							dd(props.withdrawRequest.time, props.withdrawalPeriods.time, 'seconds') > 0 ||
 							props.currentEpoch < props.withdrawRequest.epoch + props.withdrawalPeriods.epochs
 						}
 						onClick={() => {
-							setProcessorActive(true);
+							if (!sfcAddress) return;
+							transactionBatch.start([
+								withdrawDelegation(
+									sfc,
+									sfcAddress,
+									props.withdrawRequest.validatorId,
+									props.withdrawRequest.id
+								)
+							]);
 						}}
 					>
 						Withdraw
 					</Button>
 				</CardFooter>
 			</Card>
-			<TransactionProcessor
-				transactions={[
-					withdrawDelegation(
-						sfc,
-						typedChain?.contracts.sfc.address!,
-						props.withdrawRequest.validatorId,
-						props.withdrawRequest.id
-					)
-				]}
-				onSuccess={() => {
-					setProcessorActive(false);
-					update();
-				}}
-				onFail={() => {
-					setProcessorActive(false);
-					update();
-				}}
-				active={processorActive}
-			/>
 		</>
 	);
 }
