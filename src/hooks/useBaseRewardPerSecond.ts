@@ -1,15 +1,27 @@
+import { useStakingSession } from '@/components/Contexts/StakingSession';
 import SFCAbi from '@/config/contracts/sfc';
-import { VinuChain } from '@/types/vinuChain';
-import { Chain } from 'viem';
-import { useClient, useReadContract } from 'wagmi';
+import { ReadState } from '@/types/readState';
+import { useReadContract } from 'wagmi';
 
-export default function useBaseRewardPerSecond() {
-	const client = useClient();
-	const typedChain = client?.chain as (Chain & VinuChain) | undefined;
+export default function useBaseRewardPerSecond(enabled = true): ReadState<bigint | null> {
+	const state = useStakingSession();
+	const session = state.status === 'supported' ? state.session : undefined;
 	const baseRPS = useReadContract({
 		abi: SFCAbi,
-		address: typedChain?.contracts.sfc.address,
-		functionName: 'baseRewardPerSecond'
+		address: session?.chain.contracts.sfc.address,
+		chainId: session?.chain.id,
+		functionName: 'baseRewardPerSecond',
+		scopeKey: session ? `dashboard:${session.chain.id}` : undefined,
+		query: { enabled: Boolean(session && enabled) }
 	});
-	return (baseRPS.data as bigint) || 0n;
+	return {
+		data: baseRPS.error === null && typeof baseRPS.data === 'bigint' ? baseRPS.data : null,
+		isLoading: baseRPS.isLoading,
+		isFetching: baseRPS.isFetching,
+		error: baseRPS.error,
+		failures: [],
+		refetch: async () => {
+			await baseRPS.refetch();
+		}
+	};
 }

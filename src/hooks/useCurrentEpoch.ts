@@ -1,15 +1,28 @@
+import { useStakingSession } from '@/components/Contexts/StakingSession';
 import SFCAbi from '@/config/contracts/sfc';
-import { VinuChain } from '@/types/vinuChain';
-import { Chain } from 'viem';
-import { useClient, useReadContract } from 'wagmi';
+import { ReadState } from '@/types/readState';
+import { useReadContract } from 'wagmi';
 
-export default function useCurrentEpoch() {
-	const client = useClient();
-	const typedChain = client?.chain as (Chain & VinuChain) | undefined;
+export default function useCurrentEpoch(): ReadState<bigint | null> {
+	const state = useStakingSession();
+	const session = state.status === 'supported' ? state.session : undefined;
 	const currentEpoch = useReadContract({
 		abi: SFCAbi,
-		address: typedChain?.contracts.sfc.address,
-		functionName: 'currentEpoch'
+		address: session?.chain.contracts.sfc.address,
+		chainId: session?.chain.id,
+		functionName: 'currentEpoch',
+		scopeKey: session ? `dashboard:${session.chain.id}` : undefined,
+		query: { enabled: Boolean(session) }
 	});
-	return (currentEpoch.data as bigint) || 0n;
+	return {
+		data:
+			currentEpoch.error === null && typeof currentEpoch.data === 'bigint' ? currentEpoch.data : null,
+		isLoading: currentEpoch.isLoading,
+		isFetching: currentEpoch.isFetching,
+		error: currentEpoch.error,
+		failures: [],
+		refetch: async () => {
+			await currentEpoch.refetch();
+		}
+	};
 }

@@ -1,16 +1,14 @@
 import { default as sfc } from '@/config/contracts/sfc';
-import { ReadContractParameters } from '@wagmi/core';
 import { Address } from 'viem';
 export default function getDelegationWithdrawRequests(
-	abi: typeof sfc,
-	contract: Address,
+	address: Address,
 	validatorId: bigint,
-	address: Address
-): ReadContractParameters {
+	offset: bigint,
+	limit: bigint
+) {
 	return {
-		abi: abi,
-		address: contract,
-		functionName: 'getWrRequests',
-		args: [address || '0x0', validatorId, 0, 100]
+		abi: sfc,
+		functionName: 'getWrRequests' as const,
+		args: [address, validatorId, offset, limit] as const
 	};
 }

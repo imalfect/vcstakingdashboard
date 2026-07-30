@@ -1,26 +1,20 @@
-import { UpdateContext } from '@/components/Contexts/UpdateContext';
-import TransactionProcessor from '@/components/TransactionProcessor/Processor';
-import { TransactionProp } from '@/components/TransactionProcessor/types';
+import { useStakingSession } from '@/components/Contexts/StakingSession';
+import { useTransactionBatch } from '@/components/TransactionProcessor/context';
 import { Button } from '@/components/ui/button';
 import sfc from '@/config/contracts/sfc';
 import undelegate from '@/generators/write/undelegate';
 import unlockStake from '@/generators/write/unlockStake';
 import humanify from '@/scripts/humanify';
 import { Delegation } from '@/types/delegation';
-import { VinuChain } from '@/types/vinuChain';
 import { clsx } from 'clsx';
 import dayjs from 'dayjs';
 import { LucideLockKeyhole, LucideLockOpen } from 'lucide-react';
-import { useContext, useState } from 'react';
-import { Chain } from 'viem';
-import { useClient } from 'wagmi';
 
 export default function UndelegateContent(props: { delegation: Delegation; mobile?: boolean }) {
-	const update = useContext(UpdateContext);
-	const [transactions, setTransactions] = useState<TransactionProp[]>([]);
-	const [processorActive, setProcessorActive] = useState(false);
-	const client = useClient();
-	const typedChain = client?.chain as (Chain & VinuChain) | undefined;
+	const transactionBatch = useTransactionBatch();
+	const state = useStakingSession();
+	const session = state.status === 'supported' ? state.session : undefined;
+	const sfcAddress = session?.chain.contracts.sfc.address;
 	return (
 		<>
 			<div
@@ -33,16 +27,10 @@ export default function UndelegateContent(props: { delegation: Delegation; mobil
 					<p className={'flex items-center gap-3 text-2xl font-bold'}>
 						<LucideLockKeyhole
 							onDoubleClick={() => {
-								if (props.delegation.lockedAmount !== 0n) {
-									setTransactions([
-										unlockStake(
-											sfc,
-											typedChain?.contracts.sfc.address!,
-											props.delegation.validatorId,
-											props.delegation.lockedAmount
-										)
+								if (session && sfcAddress && props.delegation.lockedAmount !== 0n) {
+									transactionBatch.start([
+										unlockStake(sfc, sfcAddress, props.delegation.validatorId, props.delegation.lockedAmount)
 									]);
-									setProcessorActive(true);
 								}
 							}}
 						/>
@@ -76,21 +64,17 @@ export default function UndelegateContent(props: { delegation: Delegation; mobil
 					<p>Unlock your expired locked delegation.</p>
 					<Button
 						disabled={
+							!sfcAddress ||
 							!(
 								dayjs.unix(Number(props.delegation.lockedDelegation?.endTime)).diff(dayjs(), 'seconds') <=
 									0 && props.delegation.lockedAmount !== 0n
 							)
 						}
 						onClick={() => {
-							setTransactions([
-								unlockStake(
-									sfc,
-									typedChain?.contracts.sfc.address!,
-									props.delegation.validatorId,
-									props.delegation.lockedAmount
-								)
+							if (!session || !sfcAddress) return;
+							transactionBatch.start([
+								unlockStake(sfc, sfcAddress, props.delegation.validatorId, props.delegation.lockedAmount)
 							]);
-							setProcessorActive(true);
 						}}
 					>
 						Unlock
@@ -100,17 +84,12 @@ export default function UndelegateContent(props: { delegation: Delegation; mobil
 					<p className={'text-lg font-bold'}>Step 2</p>
 					<p>Start the undelegation process</p>
 					<Button
-						disabled={props.delegation.unlockedAmount === 0n}
+						disabled={!sfcAddress || props.delegation.unlockedAmount === 0n}
 						onClick={() => {
-							setTransactions([
-								undelegate(
-									sfc,
-									typedChain?.contracts.sfc.address!,
-									props.delegation.validatorId,
-									props.delegation.unlockedAmount
-								)
+							if (!session || !sfcAddress) return;
+							transactionBatch.start([
+								undelegate(sfc, sfcAddress, props.delegation.validatorId, props.delegation.unlockedAmount)
 							]);
-							setProcessorActive(true);
 						}}
 					>
 						Undelegate
@@ -121,20 +100,6 @@ export default function UndelegateContent(props: { delegation: Delegation; mobil
 					<p>After 24 hours, withdraw your funds using the undelegations tab.</p>
 				</div>
 			</div>
-			<TransactionProcessor
-				transactions={transactions}
-				onSuccess={() => {
-					setProcessorActive(false);
-					update();
-				}}
-				onFail={() => {
-					setProcessorActive(false);
-					setTimeout(() => {
-						update();
-					}, 5000);
-				}}
-				active={processorActive}
-			/>
 		</>
 	);
 }

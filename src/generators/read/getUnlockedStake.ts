@@ -11,6 +11,6 @@ export default function getUnlockedStake(
 		abi: abi,
 		address: contract,
 		functionName: 'getUnlockedStake',
-		args: [address || '0x0', validatorId]
+		args: [address, validatorId]
 	};
 }

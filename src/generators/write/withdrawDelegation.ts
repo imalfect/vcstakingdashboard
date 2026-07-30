@@ -1,4 +1,4 @@
-import { TransactionProp } from '@/components/TransactionProcessor/types';
+import { TransactionRequest } from '@/components/TransactionProcessor/types';
 import sfc from '@/config/contracts/sfc';
 import { Address } from 'viem';
 export default function withdrawDelegation(
@@ -6,12 +6,13 @@ export default function withdrawDelegation(
 	contract: Address,
 	validatorId: bigint,
 	requestId: bigint
-): TransactionProp {
+): TransactionRequest {
 	return {
 		abi,
 		address: contract,
 		functionName: 'withdraw',
 		args: [validatorId, requestId],
-		name: 'Finalize withdrawal request'
+		name: 'Finalize withdrawal request',
+		contractKey: 'sfc'
 	};
 }

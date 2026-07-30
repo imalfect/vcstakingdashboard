@@ -1,7 +1,6 @@
 import { MAX_LOCK_DAYS } from '@/config/constants';
 import { DatePicker } from '@/components/ui/date-picker';
 import humanify from '@/scripts/humanify';
-import { unixify } from '@/scripts/unixify';
 import { Delegation } from '@/types/delegation';
 import Validator from '@/types/validator';
 import { clsx } from 'clsx';
@@ -11,19 +10,19 @@ import { LucideLockKeyhole, LucideLockOpen } from 'lucide-react';
 export default function RelockDelegationContent(props: {
 	mobile?: boolean;
 	delegation: Delegation;
-	validator: Validator | null;
+	validator: Validator;
 	onNewLockDate: (date: Date) => void;
 	newLockDate: Date | null;
 }) {
-	console.log(props.delegation);
-	console.log('old delegation lock date', props.delegation.lockedDelegation!.endTime.toString());
-	console.log('new lock date', unixify(props.newLockDate!));
-	console.log(
-		`old lock date bigger than new? ${props.delegation.lockedDelegation!.endTime > unixify(props.newLockDate!)}`
-	);
-	console.log(
-		`difference in hours between old and new lock date: ${dayjs(props.newLockDate).diff(dayjs.unix(Number(props.delegation.lockedDelegation!.endTime)), 'hours')}`
-	);
+	const lockedDelegation = props.delegation.lockedDelegation;
+	const minimumLockup = dayjs().add(15, 'days');
+	const validatorMinimumLockup =
+		lockedDelegation && lockedDelegation.lockedStake !== 0n
+			? dayjs.unix(Number(lockedDelegation.endTime)).add(1, 'day')
+			: null;
+	const fromDate = validatorMinimumLockup?.isAfter(minimumLockup)
+		? validatorMinimumLockup.toDate()
+		: minimumLockup.toDate();
 	return (
 		<>
 			<div
@@ -53,29 +52,18 @@ export default function RelockDelegationContent(props: {
 				</div>
 			</div>
 			<p className={'mt-2 text-center text-sm'}>
-				You can only relock your delegation for a longer time than your locked delegation.
+				{lockedDelegation && lockedDelegation.lockedStake !== 0n
+					? 'You can only relock your delegation for a longer time than your locked delegation.'
+					: 'Choose how long you want to lock your unlocked delegation.'}
 			</p>
 			<div className={'mt-3 flex justify-center'}>
 				<DatePicker
 					onDate={(date) => {
 						props.onNewLockDate(date);
 					}}
-					fromDate={
-						props.delegation
-							? (() => {
-									const validatorMinimumLockup = dayjs
-										.unix(parseInt(props.delegation.lockedDelegation!.endTime.toString()))
-										.add(1, 'day');
-									const minimumLockup = dayjs().add(15, 'days');
-									if (props.delegation.lockedDelegation!.lockedStake === 0n) return minimumLockup.toDate();
-									return validatorMinimumLockup.isAfter(minimumLockup)
-										? validatorMinimumLockup.toDate()
-										: minimumLockup.toDate();
-								})()
-							: dayjs().add(14, 'days').toDate()
-					}
+					fromDate={fromDate}
 					toDate={dayjs()
-						.add(Math.min(props.validator?.remainingLockedStakeDays! - 1, MAX_LOCK_DAYS), 'days')
+						.add(Math.min(props.validator.remainingLockedStakeDays - 1, MAX_LOCK_DAYS), 'days')
 						.toDate()}
 					placeholder={'Choose a new lock date'}
 				/>

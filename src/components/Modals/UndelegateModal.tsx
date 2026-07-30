@@ -19,22 +19,15 @@ import {
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { Delegation } from '@/types/delegation';
 import Validator from '@/types/validator';
-import { VinuChain } from '@/types/vinuChain';
 import * as React from 'react';
 import { useState } from 'react';
-import { Chain } from 'viem';
-import { useClient } from 'wagmi';
 
 export default function UndelegateModal(props: {
 	delegation: Delegation;
 	validator: Validator | null;
 	children?: React.ReactNode;
 }) {
-	const client = useClient();
-	const typedChain = client?.chain as (Chain & VinuChain) | undefined;
 	const [open, setOpen] = useState(false);
-	const [newLockDate, setNewLockDate] = useState<Date | null>(null);
-	const [processorActive, setProcessorActive] = useState(false);
 	const isDesktop = useMediaQuery('(min-width: 768px)');
 	if (isDesktop) {
 		return (

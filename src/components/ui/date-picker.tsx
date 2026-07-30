@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { useEffect } from 'react';
 
 export function DatePicker(props: {
 	onDate: (date: Date) => void;
@@ -18,11 +17,6 @@ export function DatePicker(props: {
 	placeholder?: string;
 }) {
 	const [date, setDate] = React.useState<Date>();
-	useEffect(() => {
-		if (date) {
-			props.onDate(date);
-		}
-	}, [props, date]);
 	return (
 		<Popover modal={true}>
 			<PopoverTrigger asChild>
@@ -40,9 +34,13 @@ export function DatePicker(props: {
 			<PopoverContent className="w-auto p-0">
 				<Calendar
 					mode="single"
+					required
 					initialFocus
 					selected={date}
-					onSelect={setDate}
+					onSelect={(selectedDate) => {
+						setDate(selectedDate);
+						if (selectedDate) props.onDate(selectedDate);
+					}}
 					fromDate={props.fromDate}
 					toDate={props.toDate}
 				/>
