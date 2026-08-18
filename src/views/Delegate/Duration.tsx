@@ -1,3 +1,4 @@
+import { useStakingSession } from '@/components/Contexts/StakingSession';
 import PageHeader from '@/components/Misc/PageHeader';
 import RelockNoticeModal from '@/components/Modals/RelockNoticeModal';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,6 @@ import Validator from '@/types/validator';
 import dayjs from 'dayjs';
 import { LucideInfo } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useAccount } from 'wagmi';
 export default function DelegateDuration(props: {
 	onDuration: (
 		duration: number,
@@ -24,10 +24,11 @@ export default function DelegateDuration(props: {
 	amount: bigint;
 }) {
 	const [duration, setDuration] = useState(0);
-	const account = useAccount();
-	const previousLockedDelegation = useLockedDelegation(account.address || null, props.validator.id);
-	console.log(previousLockedDelegation);
-	const [relockNoticeOpen, setRelockNoticeOpen] = useState(previousLockedDelegation !== null);
+	const state = useStakingSession();
+	const sessionAddress = state.status === 'supported' ? state.session.address : null;
+	const lockedDelegation = useLockedDelegation(sessionAddress, props.validator.id);
+	const previousLockedDelegation = lockedDelegation.data;
+	const [relockNoticeOpen, setRelockNoticeOpen] = useState(false);
 	const [relockNoticeOpened, setRelockNoticeOpened] = useState(false);
 	const approximateDelegationRewards = useApproximateDelegationRewards(
 		props.amount,
@@ -71,28 +72,50 @@ export default function DelegateDuration(props: {
 						.toDate()}
 				/>
 
-				<p className={'mt-1 flex items-center gap-1 text-center'}>
-					Approximately <b>{approximateDelegationRewards?.apr}%</b> APR{' '}
-					<Tooltip>
-						<TooltipTrigger>
-							<LucideInfo />
-						</TooltipTrigger>
-						<TooltipContent side={'bottom'}>
-							<p>Based on current network data, might change</p>
-							<p>
-								<b>{humanify(BigInt(approximateDelegationRewards?.rewardsPerDay || 0n), 5)} VC </b> per day
-							</p>
-							<p>
-								<b>{humanify(BigInt(approximateDelegationRewards?.rewardPerEpoch || 0n), 5)} VC </b> per epoch
-							</p>
-						</TooltipContent>
-					</Tooltip>
-				</p>
+				{approximateDelegationRewards ? (
+					<p className={'mt-1 flex items-center gap-1 text-center'}>
+						Approximately <b>{approximateDelegationRewards.apr}%</b> APR{' '}
+						<Tooltip>
+							<TooltipTrigger>
+								<LucideInfo />
+							</TooltipTrigger>
+							<TooltipContent side={'bottom'}>
+								<p>Based on current network data, might change</p>
+								<p>
+									<b>{humanify(approximateDelegationRewards.rewardsPerDayWei, 5)} VC </b> per day
+								</p>
+								<p>
+									<b>{humanify(approximateDelegationRewards.rewardPerEpochWei, 5)} VC </b> per epoch
+								</p>
+							</TooltipContent>
+						</Tooltip>
+					</p>
+				) : (
+					<p className={'mt-1 text-center'}>Reward estimate unavailable.</p>
+				)}
 			</div>
+			{lockedDelegation.error && (
+				<div className="flex items-center gap-2 text-red-500">
+					<span>Unable to load your existing lock.</span>
+					<Button
+						size="sm"
+						variant="outline"
+						disabled={lockedDelegation.isFetching}
+						onClick={() => void lockedDelegation.refetch()}
+					>
+						Retry
+					</Button>
+				</div>
+			)}
 
 			<div className={'flex justify-center gap-6'}>
 				<Button
-					disabled={duration === 0}
+					disabled={
+						duration === 0 ||
+						lockedDelegation.isLoading ||
+						lockedDelegation.isFetching ||
+						lockedDelegation.error !== null
+					}
 					onClick={() => {
 						props.onDuration(duration, previousLockedDelegation !== null, previousLockedDelegation);
 					}}
@@ -102,6 +125,9 @@ export default function DelegateDuration(props: {
 				</Button>
 				<Button
 					variant={'secondary'}
+					disabled={
+						lockedDelegation.isLoading || lockedDelegation.isFetching || lockedDelegation.error !== null
+					}
 					onClick={() => {
 						props.onDuration(0, false);
 					}}

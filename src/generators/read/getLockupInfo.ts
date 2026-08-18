@@ -11,6 +11,6 @@ export default function getLockupInfo(
 		abi: abi,
 		address: contract,
 		functionName: 'getLockupInfo',
-		args: [address || '0x0', validatorId]
+		args: [address, validatorId]
 	};
 }

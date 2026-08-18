@@ -1,52 +1,109 @@
 'use client';
 import { TooltipButton } from '@/components/ui/tooltip-button';
-import { useWeb3Modal } from '@web3modal/wagmi/react';
+import { ConnectButton } from '@rainbow-me/rainbowkit/components';
 import {
 	LucideCoins,
 	LucideHandCoins,
 	LucideHome,
 	LucideInfo,
 	LucideMailbox,
+	LucideNetwork,
 	LucideReceiptText,
 	LucideWallet
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 export default function Navigation() {
 	const router = useRouter();
-	const { open } = useWeb3Modal();
 	return (
-		<div className={'flex items-end justify-center gap-3'}>
-			<TooltipButton message={'Home'} size={'icon'} onClick={() => router.push('/')}>
+		<nav aria-label={'Primary navigation'} className={'flex items-end justify-center gap-3'}>
+			<TooltipButton
+				aria-label={'Home'}
+				message={'Home'}
+				size={'icon'}
+				onClick={() => router.push('/')}
+			>
 				<LucideHome />
 			</TooltipButton>
-			<TooltipButton message={'Delegate'} size={'icon'} onClick={() => router.push('/delegate')}>
+			<TooltipButton
+				aria-label={'Delegate'}
+				message={'Delegate'}
+				size={'icon'}
+				onClick={() => router.push('/delegate')}
+			>
 				<LucideCoins />
 			</TooltipButton>
-			<TooltipButton message={'Delegations'} size={'icon'} onClick={() => router.push('/delegations')}>
+			<TooltipButton
+				aria-label={'Delegations'}
+				message={'Delegations'}
+				size={'icon'}
+				onClick={() => router.push('/delegations')}
+			>
 				<LucideReceiptText />
 			</TooltipButton>
 			<TooltipButton
+				aria-label={'Withdraw Requests'}
 				message={'Withdraw Requests'}
 				size={'icon'}
 				onClick={() => router.push('/withdraw-requests')}
 			>
 				<LucideMailbox />
 			</TooltipButton>
-			<TooltipButton message={'Payback Staking'} size={'icon'} onClick={() => router.push('/payback')}>
+			<TooltipButton
+				aria-label={'Payback Staking'}
+				message={'Payback Staking'}
+				size={'icon'}
+				onClick={() => router.push('/payback')}
+			>
 				<LucideHandCoins />
 			</TooltipButton>
-			<TooltipButton message={'About'} size={'icon'} onClick={() => router.push('/about')}>
+			<TooltipButton
+				aria-label={'About'}
+				message={'About'}
+				size={'icon'}
+				onClick={() => router.push('/about')}
+			>
 				<LucideInfo />
 			</TooltipButton>
-			<TooltipButton
-				message={'Wallet'}
-				size={'icon'}
-				onClick={() => {
-					open();
-				}}
-			>
-				<LucideWallet />
-			</TooltipButton>
-		</div>
+			<ConnectButton.Custom>
+				{({ account, chain, mounted, openAccountModal, openChainModal, openConnectModal }) => (
+					<div
+						className={'flex gap-3'}
+						aria-hidden={!mounted}
+						style={{
+							opacity: mounted ? 1 : 0,
+							pointerEvents: mounted ? 'auto' : 'none'
+						}}
+					>
+						{account && chain && (
+							<TooltipButton
+								aria-label={'Network'}
+								message={'Switch network'}
+								size={'icon'}
+								onClick={openChainModal}
+							>
+								<LucideNetwork />
+							</TooltipButton>
+						)}
+						<TooltipButton
+							aria-label={'Wallet'}
+							message={'Wallet'}
+							size={'icon'}
+							disabled={!mounted}
+							onClick={() => {
+								if (!account || !chain) {
+									openConnectModal();
+								} else if (chain.unsupported) {
+									openChainModal();
+								} else {
+									openAccountModal();
+								}
+							}}
+						>
+							<LucideWallet />
+						</TooltipButton>
+					</div>
+				)}
+			</ConnectButton.Custom>
+		</nav>
 	);
 }

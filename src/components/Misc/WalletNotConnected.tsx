@@ -1,3 +1,4 @@
+import { ConnectButton } from '@rainbow-me/rainbowkit/components';
 import { LucideWallet } from 'lucide-react';
 
 export default function WalletNotConnected() {
@@ -9,7 +10,7 @@ export default function WalletNotConnected() {
 				</h2>
 				<p className={'text-lg'}>Please connect your wallet to continue.</p>
 			</div>
-			<w3m-button />
+			<ConnectButton />
 		</div>
 	);
 }

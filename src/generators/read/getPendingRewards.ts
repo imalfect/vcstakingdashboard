@@ -11,6 +11,6 @@ export default function getPendingRewards(
 		abi: abi,
 		address: contract,
 		functionName: 'pendingRewards',
-		args: [address || '0x0', validatorId]
+		args: [address, validatorId]
 	};
 }

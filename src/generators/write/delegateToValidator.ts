@@ -1,4 +1,4 @@
-import { TransactionProp } from '@/components/TransactionProcessor/types';
+import { TransactionRequest } from '@/components/TransactionProcessor/types';
 import sfc from '@/config/contracts/sfc';
 import { Address } from 'viem';
 export default function delegateToValidator(
@@ -6,13 +6,14 @@ export default function delegateToValidator(
 	contract: Address,
 	validatorId: bigint,
 	amount: bigint
-): TransactionProp {
+): TransactionRequest {
 	return {
 		abi,
 		address: contract,
 		functionName: 'delegate',
 		value: amount,
 		args: [validatorId],
-		name: 'Delegate to Validator'
+		name: 'Delegate to Validator',
+		contractKey: 'sfc'
 	};
 }

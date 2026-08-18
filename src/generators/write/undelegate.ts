@@ -1,4 +1,4 @@
-import { TransactionProp } from '@/components/TransactionProcessor/types';
+import { TransactionRequest } from '@/components/TransactionProcessor/types';
 import sfc from '@/config/contracts/sfc';
 import { Address } from 'viem';
 export default function undelegate(
@@ -6,12 +6,13 @@ export default function undelegate(
 	contract: Address,
 	validatorId: bigint,
 	amount: bigint
-): TransactionProp {
+): TransactionRequest {
 	return {
 		abi,
 		address: contract,
 		functionName: 'undelegate',
 		args: [validatorId, amount],
-		name: 'Undelegate'
+		name: 'Undelegate',
+		contractKey: 'sfc'
 	};
 }

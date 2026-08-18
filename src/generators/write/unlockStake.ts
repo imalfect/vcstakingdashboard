@@ -1,4 +1,4 @@
-import { TransactionProp } from '@/components/TransactionProcessor/types';
+import { TransactionRequest } from '@/components/TransactionProcessor/types';
 import sfc from '@/config/contracts/sfc';
 import { Address } from 'viem';
 export default function unlockStake(
@@ -6,12 +6,13 @@ export default function unlockStake(
 	contract: Address,
 	validatorId: bigint,
 	amount: bigint
-): TransactionProp {
+): TransactionRequest {
 	return {
 		abi,
 		address: contract,
 		functionName: 'unlockStake',
 		args: [validatorId, amount],
-		name: 'DANGER: Unlock Stake'
+		name: 'DANGER: Unlock Stake',
+		contractKey: 'sfc'
 	};
 }

@@ -9,7 +9,7 @@ export interface VinuChain {
 		stake: {
 			address: Address;
 		};
-		payback: {
+		payback?: {
 			address: Address;
 		};
 	};

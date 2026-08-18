@@ -11,6 +11,6 @@ export default function getStashedLockupRewards(
 		abi: abi,
 		address: contract,
 		functionName: 'getStashedLockupRewards',
-		args: [address || '0x0', validatorId]
+		args: [address, validatorId]
 	};
 }

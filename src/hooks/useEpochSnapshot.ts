@@ -1,25 +1,50 @@
+import { useStakingSession } from '@/components/Contexts/StakingSession';
 import SFCAbi from '@/config/contracts/sfc';
-import { VinuChain } from '@/types/vinuChain';
-import { Chain } from 'viem';
-import { useClient, useReadContract } from 'wagmi';
+import { ReadState } from '@/types/readState';
+import { useReadContract } from 'wagmi';
 
-export default function useEpochSnapshot(epoch: bigint) {
-	const client = useClient();
-	const typedChain = client?.chain as (Chain & VinuChain) | undefined;
+export type EpochSnapshot = {
+	endTime: bigint;
+	epochFee: bigint;
+	totalBaseRewardWeight: bigint;
+	totalTxRewardWeight: bigint;
+	baseRewardPerSecond: bigint;
+	totalStake: bigint;
+	totalSupply: bigint;
+};
+
+export default function useEpochSnapshot(epoch: bigint | null): ReadState<EpochSnapshot | null> {
+	const state = useStakingSession();
+	const session = state.status === 'supported' ? state.session : undefined;
 	const epochSnapshot = useReadContract({
 		abi: SFCAbi,
-		address: typedChain?.contracts.sfc.address,
+		address: session?.chain.contracts.sfc.address,
+		chainId: session?.chain.id,
 		functionName: 'getEpochSnapshot',
-		args: [epoch]
+		args: [epoch ?? 0n],
+		scopeKey: session ? `dashboard:${session.chain.id}` : undefined,
+		query: { enabled: Boolean(session && epoch !== null && epoch >= 0n) }
 	});
-	if (!epochSnapshot.data || epochSnapshot.data[0] === 0n) return null;
+	const data =
+		epochSnapshot.error === null && epochSnapshot.data && epochSnapshot.data[0] !== 0n
+			? {
+					endTime: epochSnapshot.data[0],
+					epochFee: epochSnapshot.data[1],
+					totalBaseRewardWeight: epochSnapshot.data[2],
+					totalTxRewardWeight: epochSnapshot.data[3],
+					baseRewardPerSecond: epochSnapshot.data[4],
+					totalStake: epochSnapshot.data[5],
+					totalSupply: epochSnapshot.data[6]
+				}
+			: null;
 	return {
-		endTime: epochSnapshot.data[0] as bigint,
-		epochFee: epochSnapshot.data[1] as bigint,
-		totalBaseRewardWeight: epochSnapshot.data[2] as bigint,
-		totalTxRewardWeight: epochSnapshot.data[3] as bigint,
-		baseRewardPerSecond: epochSnapshot.data[4] as bigint,
-		totalStake: epochSnapshot.data[5] as bigint,
-		totalSupply: epochSnapshot.data[6] as bigint
+		data,
+		isLoading: epochSnapshot.isLoading,
+		isFetching: epochSnapshot.isFetching,
+		error: epochSnapshot.error,
+		failures: [],
+		refetch: async () => {
+			await epochSnapshot.refetch();
+		}
 	};
 }

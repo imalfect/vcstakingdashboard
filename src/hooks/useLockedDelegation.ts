@@ -1,27 +1,42 @@
+import { useStakingSession } from '@/components/Contexts/StakingSession';
 import SFCAbi from '@/config/contracts/sfc';
 import { LockedDelegation } from '@/types/lockedDelegation';
-import { VinuChain } from '@/types/vinuChain';
-import { Address, Chain } from 'viem';
-import { useClient, useReadContract } from 'wagmi';
+import { ReadState } from '@/types/readState';
+import { Address } from 'viem';
+import { useReadContract } from 'wagmi';
 
 export default function useLockedDelegation(
 	address: Address | null,
 	validatorId: bigint
-): LockedDelegation | null {
-	const client = useClient();
-	const typedChain = client?.chain as (Chain & VinuChain) | undefined;
-	const activeValidators = useReadContract({
+): ReadState<LockedDelegation | null> {
+	const state = useStakingSession();
+	const session = state.status === 'supported' ? state.session : undefined;
+	const lockupInfo = useReadContract({
 		abi: SFCAbi,
-		address: typedChain?.contracts.sfc.address,
+		address: session?.chain.contracts.sfc.address,
+		chainId: session?.chain.id,
 		functionName: 'getLockupInfo',
-		args: [address || '0x0', validatorId]
+		args: address ? [address, validatorId] : undefined,
+		scopeKey: session ? `dashboard:${session.chain.id}` : undefined,
+		query: { enabled: Boolean(session && address) }
 	});
-	if (!activeValidators.data) return null;
-	if (activeValidators.data[3] === 0n) return null;
+	const data =
+		lockupInfo.error === null && lockupInfo.data && lockupInfo.data[3] !== 0n
+			? {
+					lockedStake: lockupInfo.data[0],
+					fromEpoch: lockupInfo.data[1],
+					endTime: lockupInfo.data[2],
+					duration: lockupInfo.data[3]
+				}
+			: null;
 	return {
-		lockedStake: activeValidators.data[0],
-		fromEpoch: activeValidators.data[1],
-		endTime: activeValidators.data[2],
-		duration: activeValidators.data[3]
+		data,
+		isLoading: lockupInfo.isLoading,
+		isFetching: lockupInfo.isFetching,
+		error: lockupInfo.error,
+		failures: [],
+		refetch: async () => {
+			await lockupInfo.refetch();
+		}
 	};
 }

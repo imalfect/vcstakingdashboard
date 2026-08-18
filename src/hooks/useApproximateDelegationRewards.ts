@@ -4,34 +4,56 @@ import useCurrentEpoch from '@/hooks/useCurrentEpoch';
 import useEpochSnapshot from '@/hooks/useEpochSnapshot';
 import BigNumber from 'bignumber.js';
 
-export default function useApproximateDelegationRewards(stake: bigint, lockDuration?: number) {
-	const baseRPS = Number(useBaseRewardPerSecond()) / 1e18;
-	const newstake = Number(stake) / 1e18;
+const LOCK_MULTIPLIER_SCALE = 100_000_000_000_000_000n;
+const BASE_LOCK_MULTIPLIER_SCALED = 30_000_000_000_000_000n;
+const DAILY_LOCK_MULTIPLIER_SCALED = 191_780_785_714_286n;
+const VALIDATOR_REWARD_SHARE_SCALED = 85n;
+const VALIDATOR_REWARD_SHARE_SCALE = 100n;
+
+export default function useApproximateDelegationRewards(stakeWei: bigint, lockDays = 0) {
+	const baseRewardPerSecond = useBaseRewardPerSecond();
 	const currentEpoch = useCurrentEpoch();
-	const lastEpochSnapshot = useEpochSnapshot(currentEpoch - 1n);
+	const previousEpochSnapshot = useEpochSnapshot(
+		currentEpoch.error === null && currentEpoch.data !== null && currentEpoch.data > 0n
+			? currentEpoch.data - 1n
+			: null
+	);
+	if (
+		currentEpoch.error ||
+		currentEpoch.data === null ||
+		previousEpochSnapshot.error ||
+		!previousEpochSnapshot.data ||
+		baseRewardPerSecond.error ||
+		baseRewardPerSecond.data === null ||
+		baseRewardPerSecond.data === 0n ||
+		stakeWei === 0n ||
+		previousEpochSnapshot.data.totalBaseRewardWeight === 0n
+	) {
+		return null;
+	}
 
-	const percentage = Number(0.3) + Number(0.00191780785714286) * (Math.abs(lockDuration || 0));
+	const lockDaysClamped = BigInt(Math.max(0, lockDays));
+	const lockMultiplierScaled =
+		BASE_LOCK_MULTIPLIER_SCALED + DAILY_LOCK_MULTIPLIER_SCALED * lockDaysClamped;
+	const epochRewardNumerator =
+		BigInt(EPOCH_DURATION_SECONDS) *
+		baseRewardPerSecond.data *
+		stakeWei *
+		lockMultiplierScaled *
+		VALIDATOR_REWARD_SHARE_SCALED;
+	const epochRewardDenominator =
+		previousEpochSnapshot.data.totalBaseRewardWeight *
+		LOCK_MULTIPLIER_SCALE *
+		VALIDATOR_REWARD_SHARE_SCALE;
+	// Regression: 9600 * 10^18 * 1 * 0.3 * 0.85 / (2_448_000_000_000_000_000_001) floors to 0n; rounded BigNumber division produced 1n.
+	const rewardPerEpochWei = epochRewardNumerator / epochRewardDenominator;
+	const rewardsPerDayWei =
+		(epochRewardNumerator * 86400n) / (epochRewardDenominator * BigInt(EPOCH_DURATION_SECONDS));
+	const rewardsPerDay = new BigNumber(rewardsPerDayWei.toString());
 
-	if (!baseRPS || !lastEpochSnapshot) return null;
-	if (stake === 0n) return null;
-
-	const rewardPerEpoch = (((EPOCH_DURATION_SECONDS) * (baseRPS)) * (newstake / Number(lastEpochSnapshot.totalBaseRewardWeight)) * (Number(percentage) * (1 - 0.15)));
-
-	const rewardsPerDay = rewardPerEpoch * (86400 / EPOCH_DURATION_SECONDS);
-	
 	return {
-		rewardPerEpoch: (rewardPerEpoch.toFixed(0)),
-		rewardsPerDay: (rewardsPerDay.toFixed(0)),
-		apr: ((rewardsPerDay * (365) / (Number(newstake) / 1e18)) * (100)).toFixed(2)
+		rewardPerEpochWei,
+		rewardsPerDayWei,
+		apr: rewardsPerDay.times(365).times(100).dividedBy(stakeWei.toString()).toFixed(2)
 	};
 }
-
-//Total Delegator Reward = Delegator Reward + Delegator Fees
-//
-// Delegator Reward per epoch (locked stake):
-// delegator_BaseReward = (epochDuration * baseRewardPerSecond) * [(delegatorStake * (validatorEpochUptime/epochDuration)^2) / totalBaseRewardWeight] * (1 - 0.15)
-//
-// Delegator Reward per epoch (unlocked stake):
-// delegator_BaseReward = (epochDuration * baseRewardPerSecond) * [(delegatorStake * (validatorEpochUptime/epochDuration)^2) / totalBaseRewardWeight] * 0.30 * (1 - 0.15)
-
-

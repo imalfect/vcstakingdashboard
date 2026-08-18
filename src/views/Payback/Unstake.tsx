@@ -1,21 +1,39 @@
 import PageHeader from '@/components/Misc/PageHeader';
-import TransactionProcessor from '@/components/TransactionProcessor/Processor';
+import { useTransactionBatch } from '@/components/TransactionProcessor/context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import paybackABI from '@/config/contracts/payback';
 import unstakePayback from '@/generators/write/unstakePayback';
-import useAddressPayback from '@/hooks/useAddressPayback';
-import humanify from '@/scripts/humanify';
-import { VinuChain } from '@/types/vinuChain';
-import BigNumber from 'bignumber.js';
+import { parseVcAmount, VC_DECIMALS } from '@/scripts/parseVcAmount';
 import { useState } from 'react';
-import { Chain } from 'viem';
-import { useAccount } from 'wagmi';
-export default function PaybackUnstake(props: { onUnstake: () => void }) {
-	const [value, setValue] = useState<number>(0);
-	const [processorActive, setProcessorActive] = useState(false);
-	const account = useAccount();
-	const addressPayback = useAddressPayback(account.address!);
+import { Address, formatUnits } from 'viem';
+
+export default function PaybackUnstake(props: {
+	paybackAddress: Address;
+	stake: bigint;
+	onUnstake: () => void;
+}) {
+	const [value, setValue] = useState('');
+	const transactionBatch = useTransactionBatch({ onCompleted: props.onUnstake });
+	const parsedAmount = parseVcAmount(value);
+	const amountWei = parsedAmount.ok ? parsedAmount.amountWei : undefined;
+	const canUnstake = amountWei !== undefined && amountWei > 0n && amountWei <= props.stake;
+
+	let amountError: string | null = null;
+	if (value !== '') {
+		if (!parsedAmount.ok) {
+			amountError =
+				parsedAmount.error === 'precision'
+					? 'Use no more than 18 decimal places.'
+					: parsedAmount.error === 'overflow'
+						? 'Amount is too large.'
+						: 'Enter a valid unsigned decimal amount.';
+		} else if (parsedAmount.amountWei === 0n) {
+			amountError = 'Amount must be greater than zero.';
+		} else if (parsedAmount.amountWei > props.stake) {
+			amountError = 'Amount exceeds your available payback.';
+		}
+	}
 
 	return (
 		<div className={'flex flex-col items-center gap-3'}>
@@ -26,19 +44,19 @@ export default function PaybackUnstake(props: { onUnstake: () => void }) {
 			<div className={'flex flex-col items-center gap-1'}>
 				<div className={'flex w-full max-w-sm items-center space-x-2'}>
 					<Input
-						min={0}
-						type="number"
-						placeholder="10 VC"
+						type="text"
+						inputMode="decimal"
+						placeholder="0 VC"
 						value={value}
-						onChange={(e) => {
-							setValue(Number(e.target.value));
-						}}
+						onChange={(event) => setValue(event.target.value)}
 					/>
-
-					<Button>Available Payback</Button>
+					<Button onClick={() => setValue(formatUnits(props.stake, VC_DECIMALS))}>
+						Available Payback
+					</Button>
 				</div>
+				{amountError && <span className={'text-red-500'}>{amountError}</span>}
 				<span className={'text-gray-700 dark:text-gray-300'}>
-					{humanify(addressPayback || 0n)} VC staked for payback
+					{formatUnits(props.stake, VC_DECIMALS)} VC staked for payback
 				</span>
 			</div>
 			<p className={'text-center text-lg'}>
@@ -47,30 +65,13 @@ export default function PaybackUnstake(props: { onUnstake: () => void }) {
 			<Button
 				className={'px-12'}
 				onClick={() => {
-					setProcessorActive(true);
+					if (!canUnstake || amountWei === undefined) return;
+					transactionBatch.start([unstakePayback(paybackABI, props.paybackAddress, amountWei)]);
 				}}
-				disabled={value > new BigNumber(addressPayback.toString()).shiftedBy(-18).toNumber()}
+				disabled={!canUnstake}
 			>
 				Unstake
 			</Button>
-			<TransactionProcessor
-				transactions={[
-					unstakePayback(
-						paybackABI,
-						(account.chain as Chain & VinuChain).contracts.payback.address,
-						BigInt(new BigNumber(value).shiftedBy(18).toFixed())
-					)
-				]}
-				onSuccess={() => {
-					props.onUnstake();
-					setProcessorActive(false);
-				}}
-				onFail={() => {
-					props.onUnstake();
-					setProcessorActive(false);
-				}}
-				active={processorActive}
-			/>
 		</div>
 	);
 }
