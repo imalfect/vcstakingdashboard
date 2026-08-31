@@ -6,11 +6,13 @@ import withdrawPayback from '@/generators/write/withdrawPayback';
 import humanify from '@/scripts/humanify';
 import { PaybackWithdrawRequest } from '@/types/paybackWithdrawRequest';
 import { LucideClock, LucideFileDigit } from 'lucide-react';
-import { Address } from 'viem';
+import { Address, isAddressEqual } from 'viem';
 export default function PaybackWithdrawRequestCard(props: {
 	withdrawRequest: PaybackWithdrawRequest;
 	nowSeconds: bigint;
 	paybackAddress: Address;
+	stakerAddress: Address;
+	legacy?: boolean;
 }) {
 	const transactionBatch = useTransactionBatch();
 	const remainingSeconds =
@@ -35,6 +37,12 @@ export default function PaybackWithdrawRequestCard(props: {
 				<p className={'flex items-center gap-3'}>
 					<LucideFileDigit /> Withdrawal Request {props.withdrawRequest.id.toString()}
 				</p>
+				{props.withdrawRequest.delegator &&
+					!isAddressEqual(props.withdrawRequest.delegator, props.stakerAddress) && (
+						<p className={'break-all text-sm'}>
+							Beneficiary: {props.withdrawRequest.delegator}
+						</p>
+					)}
 				<p className={'flex items-center gap-3'}>
 					<LucideClock />
 					{remainingTime}
@@ -47,7 +55,12 @@ export default function PaybackWithdrawRequestCard(props: {
 					onClick={() => {
 						if (remainingSeconds > 0n) return;
 						transactionBatch.start([
-							withdrawPayback(payback, props.paybackAddress, props.withdrawRequest.id)
+							withdrawPayback(
+								payback,
+								props.paybackAddress,
+								props.withdrawRequest.id,
+								props.legacy ? 'paybackLegacy' : 'payback'
+							)
 						]);
 					}}
 				>

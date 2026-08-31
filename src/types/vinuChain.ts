@@ -12,5 +12,8 @@ export interface VinuChain {
 		payback?: {
 			address: Address;
 		};
+		legacyPayback?: {
+			address: Address;
+		};
 	};
 }

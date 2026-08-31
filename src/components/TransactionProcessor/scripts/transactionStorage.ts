@@ -45,7 +45,7 @@ type StoredRequest = {
 	contractKey: TransactionContractKey;
 	address: Address;
 	functionName: string;
-	args?: readonly bigint[];
+	args?: readonly (bigint | Address)[];
 	value?: bigint;
 };
 
@@ -67,6 +67,20 @@ function bigintArgs(value: unknown, length: number): value is readonly bigint[] 
 	);
 }
 
+function addressArgs(value: unknown, length: number): value is readonly Address[] {
+	return Array.isArray(value) && value.length === length && value.every((item) => isAddress(item));
+}
+
+function addressAndBigintArgs(value: unknown): value is readonly [Address, bigint] {
+	return (
+		Array.isArray(value) &&
+		value.length === 2 &&
+		isAddress(value[0]) &&
+		typeof value[1] === 'bigint' &&
+		value[1] >= 0n
+	);
+}
+
 function hasOnlyKeys(value: Record<string, unknown>, allowed: readonly string[]): boolean {
 	return Object.keys(value).every((key) => allowed.includes(key));
 }
@@ -80,18 +94,25 @@ function restoreRequest(raw: unknown, chainId: number): TransactionRequest | nul
 		raw.name.length > MAX_NAME_LENGTH
 	)
 		return null;
-	if (raw.contractKey !== 'sfc' && raw.contractKey !== 'payback') return null;
+	if (
+		raw.contractKey !== 'sfc' &&
+		raw.contractKey !== 'payback' &&
+		raw.contractKey !== 'paybackLegacy'
+	)
+		return null;
 	if (typeof raw.functionName !== 'string' || !isAddress(raw.address as string)) return null;
 	const chain = getVinuChain(chainId);
 	if (!chain) return null;
 
 	const key = raw.contractKey;
-	const configured =
-		key === 'sfc'
-			? chain.contracts.sfc.address
-			: 'payback' in chain.contracts
-				? chain.contracts.payback?.address
-				: undefined;
+	const configured = (() => {
+		if (key === 'sfc') return chain.contracts.sfc.address;
+		if (key === 'payback')
+			return 'payback' in chain.contracts ? chain.contracts.payback?.address : undefined;
+		return 'legacyPayback' in chain.contracts
+			? chain.contracts.legacyPayback?.address
+			: undefined;
+	})();
 	if (!configured || !isAddressEqual(raw.address as Address, configured)) return null;
 
 	const fn = raw.functionName;
@@ -109,10 +130,19 @@ function restoreRequest(raw: unknown, chainId: number): TransactionRequest | nul
 			((fn === 'undelegate' || fn === 'unlockStake' || fn === 'withdraw') &&
 				bigintArgs(args, 2) &&
 				value === undefined);
-	} else {
+	} else if (key === 'payback') {
 		valid =
 			(fn === 'stake' && (args === undefined || bigintArgs(args, 0)) && typeof value === 'bigint') ||
-			((fn === 'unstake' || fn === 'withdrawStake') && bigintArgs(args, 1) && value === undefined);
+			(fn === 'stakeFor' && addressArgs(args, 1) && typeof value === 'bigint') ||
+			((fn === 'unstake' || fn === 'withdrawStake') &&
+				bigintArgs(args, 1) &&
+				value === undefined) ||
+			(fn === 'unstakeFor' && addressAndBigintArgs(args) && value === undefined);
+	} else {
+		valid =
+			(fn === 'unstake' || fn === 'withdrawStake') &&
+			bigintArgs(args, 1) &&
+			value === undefined;
 	}
 	if (!valid) return null;
 
@@ -140,7 +170,9 @@ export function serializeStoredBatch(batch: ActiveTransactionBatch): string {
 				contractKey: row.request.contractKey,
 				address: row.request.address,
 				functionName: String(row.request.functionName),
-				...(row.request.args === undefined ? {} : { args: row.request.args as readonly bigint[] }),
+				...(row.request.args === undefined
+					? {}
+					: { args: row.request.args as readonly (bigint | Address)[] }),
 				...(row.request.value === undefined ? {} : { value: row.request.value })
 			},
 			broadcastAttempt: row.broadcastAttempt,

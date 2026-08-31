@@ -15,6 +15,17 @@ export function usePaybackContractAddress(): Address | undefined {
 	return address && isAddress(address) ? address : undefined;
 }
 
+export function useLegacyPaybackContractAddress(): Address | undefined {
+	const state = useStakingSession();
+	if (state.status !== 'supported') return undefined;
+
+	const address =
+		'legacyPayback' in state.session.chain.contracts
+			? state.session.chain.contracts.legacyPayback.address
+			: undefined;
+	return address && isAddress(address) ? address : undefined;
+}
+
 export function PaybackCapabilityGate({ children }: { children: ReactNode }) {
 	const state = useStakingSession();
 	const paybackAddress = usePaybackContractAddress();

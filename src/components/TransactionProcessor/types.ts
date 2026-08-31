@@ -2,7 +2,7 @@ import type { SupportedChainId } from '@/config/wagmiShared';
 import type { WriteContractParameters } from '@wagmi/core';
 import type { Address, Hash } from 'viem';
 
-export type TransactionContractKey = 'sfc' | 'payback';
+export type TransactionContractKey = 'sfc' | 'payback' | 'paybackLegacy';
 
 export type TransactionRequest = Omit<WriteContractParameters, 'account' | 'chainId'> & {
 	readonly name: string;

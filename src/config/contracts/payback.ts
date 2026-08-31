@@ -1,6 +1,32 @@
 export default [
 	{
-		inputs: [],
+		inputs: [
+			{
+				internalType: 'address',
+				name: 'owner_',
+				type: 'address'
+			},
+			{
+				internalType: 'uint16',
+				name: '_feeRefundBlockCount',
+				type: 'uint16'
+			},
+			{
+				internalType: 'uint256',
+				name: '_minStake',
+				type: 'uint256'
+			},
+			{
+				internalType: 'uint256',
+				name: '_quotaFactor',
+				type: 'uint256'
+			},
+			{
+				internalType: 'uint256',
+				name: '_holdTime',
+				type: 'uint256'
+			}
+		],
 		stateMutability: 'nonpayable',
 		type: 'constructor'
 	},
@@ -47,19 +73,6 @@ export default [
 			}
 		],
 		name: 'HoldTimeUpdated',
-		type: 'event'
-	},
-	{
-		anonymous: false,
-		inputs: [
-			{
-				indexed: false,
-				internalType: 'uint8',
-				name: 'version',
-				type: 'uint8'
-			}
-		],
-		name: 'Initialized',
 		type: 'event'
 	},
 	{
@@ -113,6 +126,31 @@ export default [
 			{
 				indexed: true,
 				internalType: 'address',
+				name: 'staker',
+				type: 'address'
+			},
+			{
+				indexed: true,
+				internalType: 'address',
+				name: 'delegator',
+				type: 'address'
+			},
+			{
+				indexed: false,
+				internalType: 'uint256',
+				name: 'amount',
+				type: 'uint256'
+			}
+		],
+		name: 'StakeFor',
+		type: 'event'
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{
+				indexed: true,
+				internalType: 'address',
 				name: 'delegator',
 				type: 'address'
 			},
@@ -138,6 +176,37 @@ export default [
 			{
 				indexed: true,
 				internalType: 'address',
+				name: 'staker',
+				type: 'address'
+			},
+			{
+				indexed: true,
+				internalType: 'address',
+				name: 'delegator',
+				type: 'address'
+			},
+			{
+				indexed: false,
+				internalType: 'uint256',
+				name: 'amount',
+				type: 'uint256'
+			},
+			{
+				indexed: true,
+				internalType: 'uint256',
+				name: 'wrID',
+				type: 'uint256'
+			}
+		],
+		name: 'UndelegatedFor',
+		type: 'event'
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{
+				indexed: true,
+				internalType: 'address',
 				name: 'delegator',
 				type: 'address'
 			},
@@ -155,6 +224,37 @@ export default [
 			}
 		],
 		name: 'Withdrawn',
+		type: 'event'
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{
+				indexed: true,
+				internalType: 'address',
+				name: 'staker',
+				type: 'address'
+			},
+			{
+				indexed: true,
+				internalType: 'address',
+				name: 'delegator',
+				type: 'address'
+			},
+			{
+				indexed: false,
+				internalType: 'uint256',
+				name: 'amount',
+				type: 'uint256'
+			},
+			{
+				indexed: true,
+				internalType: 'uint256',
+				name: 'wrID',
+				type: 'uint256'
+			}
+		],
+		name: 'WithdrawnFor',
 		type: 'event'
 	},
 	{
@@ -302,7 +402,7 @@ export default [
 		inputs: [
 			{
 				internalType: 'address',
-				name: 'delegator',
+				name: 'staker',
 				type: 'address'
 			},
 			{
@@ -331,7 +431,7 @@ export default [
 		inputs: [
 			{
 				internalType: 'address',
-				name: 'delegator',
+				name: 'staker',
 				type: 'address'
 			},
 			{
@@ -375,7 +475,7 @@ export default [
 						type: 'bool'
 					}
 				],
-				internalType: 'struct QuotaContract.WithdrawalRequest[]',
+				internalType: 'struct QuotaContractV2.WithdrawalRequest[]',
 				name: '',
 				type: 'tuple[]'
 			}
@@ -387,7 +487,7 @@ export default [
 		inputs: [
 			{
 				internalType: 'address',
-				name: 'delegator',
+				name: 'staker',
 				type: 'address'
 			},
 			{
@@ -431,7 +531,7 @@ export default [
 						type: 'bool'
 					}
 				],
-				internalType: 'struct QuotaContract.WithdrawalRequest[]',
+				internalType: 'struct QuotaContractV2.WithdrawalRequest[]',
 				name: '',
 				type: 'tuple[]'
 			}
@@ -443,7 +543,31 @@ export default [
 		inputs: [
 			{
 				internalType: 'address',
-				name: 'delegator',
+				name: '',
+				type: 'address'
+			},
+			{
+				internalType: 'address',
+				name: '',
+				type: 'address'
+			}
+		],
+		name: 'getFundedStake',
+		outputs: [
+			{
+				internalType: 'uint256',
+				name: '',
+				type: 'uint256'
+			}
+		],
+		stateMutability: 'view',
+		type: 'function'
+	},
+	{
+		inputs: [
+			{
+				internalType: 'address',
+				name: 'staker',
 				type: 'address'
 			}
 		],
@@ -462,7 +586,7 @@ export default [
 		inputs: [
 			{
 				internalType: 'address',
-				name: 'delegator',
+				name: 'staker',
 				type: 'address'
 			}
 		],
@@ -544,7 +668,31 @@ export default [
 		inputs: [
 			{
 				internalType: 'address',
-				name: 'delegator',
+				name: '',
+				type: 'address'
+			},
+			{
+				internalType: 'uint256',
+				name: '',
+				type: 'uint256'
+			}
+		],
+		name: 'getWithdrawalRequestDelegator',
+		outputs: [
+			{
+				internalType: 'address',
+				name: '',
+				type: 'address'
+			}
+		],
+		stateMutability: 'view',
+		type: 'function'
+	},
+	{
+		inputs: [
+			{
+				internalType: 'address',
+				name: 'staker',
 				type: 'address'
 			},
 			{
@@ -575,39 +723,6 @@ export default [
 			}
 		],
 		stateMutability: 'view',
-		type: 'function'
-	},
-	{
-		inputs: [
-			{
-				internalType: 'address',
-				name: 'owner',
-				type: 'address'
-			},
-			{
-				internalType: 'uint16',
-				name: '_feeRefundBlockCount',
-				type: 'uint16'
-			},
-			{
-				internalType: 'uint256',
-				name: '_minStake',
-				type: 'uint256'
-			},
-			{
-				internalType: 'uint256',
-				name: '_quotaFactor',
-				type: 'uint256'
-			},
-			{
-				internalType: 'uint256',
-				name: '_holdTime',
-				type: 'uint256'
-			}
-		],
-		name: 'initialize',
-		outputs: [],
-		stateMutability: 'nonpayable',
 		type: 'function'
 	},
 	{
@@ -716,6 +831,19 @@ export default [
 		type: 'function'
 	},
 	{
+		inputs: [
+			{
+				internalType: 'address',
+				name: 'delegator',
+				type: 'address'
+			}
+		],
+		name: 'stakeFor',
+		outputs: [],
+		stateMutability: 'payable',
+		type: 'function'
+	},
+	{
 		inputs: [],
 		name: 'totalStake',
 		outputs: [
@@ -750,6 +878,30 @@ export default [
 			}
 		],
 		name: 'unstake',
+		outputs: [
+			{
+				internalType: 'uint256',
+				name: 'wrID',
+				type: 'uint256'
+			}
+		],
+		stateMutability: 'nonpayable',
+		type: 'function'
+	},
+	{
+		inputs: [
+			{
+				internalType: 'address',
+				name: 'delegator',
+				type: 'address'
+			},
+			{
+				internalType: 'uint256',
+				name: 'amount',
+				type: 'uint256'
+			}
+		],
+		name: 'unstakeFor',
 		outputs: [
 			{
 				internalType: 'uint256',

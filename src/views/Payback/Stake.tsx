@@ -10,11 +10,16 @@ import usePaybackMinimumStake from '@/hooks/usePaybackMinimumStake';
 import usePaybackPerEpoch from '@/hooks/usePaybackPerEpoch';
 import { parseVcAmount, VC_DECIMALS } from '@/scripts/parseVcAmount';
 import { useState } from 'react';
-import { Address, formatUnits } from 'viem';
+import { Address, formatUnits, isAddress, isAddressEqual } from 'viem';
 import { useBalance } from 'wagmi';
 
-export default function PaybackStake(props: { paybackAddress: Address; onStake: () => void }) {
+export default function PaybackStake(props: {
+	address: Address;
+	paybackAddress: Address;
+	onStake: () => void;
+}) {
 	const [value, setValue] = useState('');
+	const [beneficiary, setBeneficiary] = useState('');
 	const state = useStakingSession();
 	const session = state.status === 'supported' ? state.session : undefined;
 	const transactionBatch = useTransactionBatch({ onCompleted: props.onStake });
@@ -32,6 +37,15 @@ export default function PaybackStake(props: { paybackAddress: Address; onStake: 
 		query: { enabled: Boolean(session?.address) }
 	});
 	const minimumStake = usePaybackMinimumStake(props.paybackAddress);
+	const beneficiaryValue = beneficiary.trim();
+	const beneficiaryAddress =
+		beneficiaryValue === ''
+			? props.address
+			: isAddress(beneficiaryValue)
+				? beneficiaryValue
+				: undefined;
+	const isSponsoredStake =
+		beneficiaryAddress !== undefined && !isAddressEqual(beneficiaryAddress, props.address);
 	const canStake =
 		!minimumStake.isLoading &&
 		!minimumStake.isFetching &&
@@ -44,7 +58,8 @@ export default function PaybackStake(props: { paybackAddress: Address; onStake: 
 		minimumStake.minimumStake !== null &&
 		amountWei >= minimumStake.minimumStake &&
 		balance.data !== undefined &&
-		amountWei <= balance.data.value;
+		amountWei <= balance.data.value &&
+		beneficiaryAddress !== undefined;
 
 	let amountError: string | null = null;
 	if (value !== '') {
@@ -69,7 +84,27 @@ export default function PaybackStake(props: { paybackAddress: Address; onStake: 
 
 	return (
 		<div className={'flex flex-col items-center gap-3'}>
-			<PageHeader title={'Stake for payback'} subtitle={"Choose the amount you'd like to stake."} />
+			<PageHeader
+				title={'Stake for payback'}
+				subtitle={'Stake for yourself or sponsor payback for another wallet.'}
+			/>
+			<div className={'w-full max-w-sm'}>
+				<label className={'mb-1 block text-sm font-medium'} htmlFor="payback-beneficiary">
+					Beneficiary wallet (optional)
+				</label>
+				<Input
+					id="payback-beneficiary"
+					placeholder={props.address}
+					value={beneficiary}
+					onChange={(event) => setBeneficiary(event.target.value)}
+				/>
+				{beneficiaryValue !== '' && !beneficiaryAddress && (
+					<span className={'text-sm text-red-500'}>Enter a valid wallet address.</span>
+				)}
+				<p className={'mt-1 text-xs text-gray-700 dark:text-gray-300'}>
+					You retain ownership of sponsored funds and can unstake them later.
+				</p>
+			</div>
 			<div className={'flex flex-col items-center gap-1'}>
 				<div className={'flex w-full max-w-sm items-center space-x-2'}>
 					<Input
@@ -136,11 +171,18 @@ export default function PaybackStake(props: { paybackAddress: Address; onStake: 
 				className={'px-12'}
 				onClick={() => {
 					if (!canStake || amountWei === undefined) return;
-					transactionBatch.start([stakeForPayback(paybackABI, props.paybackAddress, amountWei)]);
+					transactionBatch.start([
+						stakeForPayback(
+							paybackABI,
+							props.paybackAddress,
+							amountWei,
+							isSponsoredStake ? beneficiaryAddress : undefined
+						)
+					]);
 				}}
 				disabled={!canStake}
 			>
-				Stake
+				{isSponsoredStake ? 'Stake for Address' : 'Stake'}
 			</Button>
 		</div>
 	);
